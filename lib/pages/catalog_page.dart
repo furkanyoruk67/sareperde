@@ -9,6 +9,16 @@ import '../widgets/product_card.dart';
 import '../widgets/product_modal.dart';
 import 'cart_page.dart';
 import 'favorites_page.dart';
+import '../widgets/login_dialog.dart';
+import '../widgets/dimension_dialog.dart';
+
+// Sorting options enum
+enum SortOption {
+  nameAZ,
+  nameZA,
+  priceLowHigh,
+  priceHighLow,
+}
 
 class CatalogPage extends StatefulWidget {
   const CatalogPage({Key? key}) : super(key: key);
@@ -27,8 +37,17 @@ class _CatalogPageState extends State<CatalogPage> {
   final Set<String> _selectedBrands = {};
   RangeValues _priceRange = const RangeValues(0, 5000);
 
+  // --- Sorting state ---
+  SortOption _currentSortOption = SortOption.nameAZ;
+
   // Gösterilen ürünler
   late List<Product> _visibleProducts = List<Product>.from(ProductData.allProducts);
+
+  @override
+  void initState() {
+    super.initState();
+    _applySorting(); // Apply initial sorting
+  }
 
   // --- Hover ve Modal state ---
   int? _hoveredProductIndex;
@@ -50,7 +69,64 @@ class _CatalogPageState extends State<CatalogPage> {
         final inPrice = p.price >= _priceRange.start && p.price <= _priceRange.end;
         return inCategory && inType && inSize && inQuality && inColor && inBrand && inPrice;
       }).toList();
+
+      // Apply sorting after filtering
+      _applySorting();
     });
+  }
+
+  void _applySorting() {
+    switch (_currentSortOption) {
+      case SortOption.nameAZ:
+        _visibleProducts.sort((a, b) => _compareTurkishStrings(a.name, b.name));
+        break;
+      case SortOption.nameZA:
+        _visibleProducts.sort((a, b) => _compareTurkishStrings(b.name, a.name));
+        break;
+      case SortOption.priceLowHigh:
+        _visibleProducts.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case SortOption.priceHighLow:
+        _visibleProducts.sort((a, b) => b.price.compareTo(a.price));
+        break;
+    }
+  }
+
+  // Helper method to compare Turkish strings properly
+  int _compareTurkishStrings(String a, String b) {
+    // Convert Turkish characters to their ASCII equivalents for proper sorting
+    String normalizeString(String str) {
+      return str
+          .toLowerCase()
+          .replaceAll('ç', 'c')
+          .replaceAll('ğ', 'g')
+          .replaceAll('ı', 'i')
+          .replaceAll('ö', 'o')
+          .replaceAll('ş', 's')
+          .replaceAll('ü', 'u');
+    }
+
+    return normalizeString(a).compareTo(normalizeString(b));
+  }
+
+  void _changeSortOption(SortOption option) {
+    setState(() {
+      _currentSortOption = option;
+      _applySorting();
+    });
+  }
+
+  String _getSortOptionText(SortOption option) {
+    switch (option) {
+      case SortOption.nameAZ:
+        return 'İsim (A-Z)';
+      case SortOption.nameZA:
+        return 'İsim (Z-A)';
+      case SortOption.priceLowHigh:
+        return 'Fiyat (Düşük-Yüksek)';
+      case SortOption.priceHighLow:
+        return 'Fiyat (Yüksek-Düşük)';
+    }
   }
 
   void _openProductModal(Product product) {
@@ -81,6 +157,238 @@ class _CatalogPageState extends State<CatalogPage> {
     return _favoriteProducts.contains(product);
   }
 
+  void _showDimensionDialog(Product product) {
+    showDialog(
+      context: context,
+      builder: (context) => DimensionDialog(
+        product: product,
+        onAddToCart: () {
+          // This will be called when dimensions are provided
+        },
+      ),
+    ).then((result) {
+      if (result != null && result is Map<String, dynamic>) {
+        final width = result['width'] as double;
+        final height = result['height'] as double;
+        
+        // Add to cart with dimensions
+        context.read<CartProvider>().addItem(
+          product,
+          width: width,
+          height: height,
+        );
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${product.name} sepete eklendi (${width.toStringAsFixed(0)}x${height.toStringAsFixed(0)} cm)'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  void _showContactInfo() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.location_on, color: AppColors.primary),
+            const SizedBox(width: 8),
+            const Text(
+              'İletişim Bilgileri',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Store name and owner
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Sare Perde',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Gülden-Murat Özdemir',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Address
+            Row(
+              children: [
+                Icon(Icons.location_on_outlined, color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Adres:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Padding(
+              padding: EdgeInsets.only(left: 28),
+              child: Text(
+                'Atatürk Caddesi No: 123\nMerkez Mahallesi\n34000 İstanbul, Türkiye',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Phone number
+            Row(
+              children: [
+                Icon(Icons.phone, color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Telefon:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 28),
+              child: Row(
+                children: [
+                  const Text(
+                    '0532 595 84 76',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.success,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'Ara',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.surface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Map placeholder
+            Container(
+              height: 150,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.map_outlined,
+                    size: 40,
+                    color: AppColors.textSecondary,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Google Maps Entegrasyonu',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Mağaza konumu burada gösterilecek',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Kapat'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Here you can add functionality to open phone dialer
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Telefon uygulaması açılıyor...'),
+                  backgroundColor: AppColors.primary,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.surface,
+            ),
+            child: const Text('Ara'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,21 +402,18 @@ class _CatalogPageState extends State<CatalogPage> {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Image.asset('assets/logo1.jpg', height: 28),
+                padding: const EdgeInsets.all(4),
+                child: Image.asset('assets/logo1.jpg', height: 40),
               ),
               const SizedBox(width: 16),
               const Text(
                 'Sare Perde',
                 style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w300,
                   color: AppColors.textPrimary,
-                  letterSpacing: -0.5,
+                  letterSpacing: 1.2,
+                  fontFamily: 'Didot',
                 ),
               ),
             ],
@@ -131,7 +436,12 @@ class _CatalogPageState extends State<CatalogPage> {
           ),
           const SizedBox(width: 8),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => const LoginDialog(),
+              );
+            },
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -226,12 +536,12 @@ class _CatalogPageState extends State<CatalogPage> {
               ],
             ),
             child: InkWell(
-              onTap: () {},
+              onTap: _showContactInfo,
               borderRadius: BorderRadius.circular(12),
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Text(
-                  '05325958476',
+                  'İletişim',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.surface,
@@ -354,31 +664,148 @@ class _CatalogPageState extends State<CatalogPage> {
                               ),
                             ],
                           ),
-                          // Buraya sıralama vs. eklenebilir
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.sort,
-                                  size: 16,
-                                  color: AppColors.textSecondary,
+                          // Sorting dropdown
+                          PopupMenuButton<SortOption>(
+                            onSelected: _changeSortOption,
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: SortOption.nameAZ,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.sort_by_alpha,
+                                      size: 16,
+                                      color: _currentSortOption == SortOption.nameAZ
+                                          ? AppColors.primary
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'İsim (A-Z)',
+                                      style: TextStyle(
+                                        color: _currentSortOption == SortOption.nameAZ
+                                            ? AppColors.primary
+                                            : AppColors.textSecondary,
+                                        fontWeight: _currentSortOption == SortOption.nameAZ
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Sırala',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                              ),
+                              PopupMenuItem(
+                                value: SortOption.nameZA,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.sort_by_alpha,
+                                      size: 16,
+                                      color: _currentSortOption == SortOption.nameZA
+                                          ? AppColors.primary
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'İsim (Z-A)',
+                                      style: TextStyle(
+                                        color: _currentSortOption == SortOption.nameZA
+                                            ? AppColors.primary
+                                            : AppColors.textSecondary,
+                                        fontWeight: _currentSortOption == SortOption.nameZA
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuDivider(),
+                              PopupMenuItem(
+                                value: SortOption.priceLowHigh,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_upward,
+                                      size: 16,
+                                      color: _currentSortOption == SortOption.priceLowHigh
+                                          ? AppColors.primary
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Fiyat (Düşük-Yüksek)',
+                                      style: TextStyle(
+                                        color: _currentSortOption == SortOption.priceLowHigh
+                                            ? AppColors.primary
+                                            : AppColors.textSecondary,
+                                        fontWeight: _currentSortOption == SortOption.priceLowHigh
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: SortOption.priceHighLow,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_downward,
+                                      size: 16,
+                                      color: _currentSortOption == SortOption.priceHighLow
+                                          ? AppColors.primary
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Fiyat (Yüksek-Düşük)',
+                                      style: TextStyle(
+                                        color: _currentSortOption == SortOption.priceHighLow
+                                            ? AppColors.primary
+                                            : AppColors.textSecondary,
+                                        fontWeight: _currentSortOption == SortOption.priceHighLow
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.sort,
+                                    size: 16,
                                     color: AppColors.textSecondary,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Sırala',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                    size: 16,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -419,19 +846,7 @@ class _CatalogPageState extends State<CatalogPage> {
                                   onHoverEnter: () => setState(() => _hoveredProductIndex = index),
                                   onHoverExit: () => setState(() => _hoveredProductIndex = null),
                                   onToggleFavorite: () => _toggleFavorite(p),
-                                  onAddToCart: () {
-                                    context.read<CartProvider>().addItem(p);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('${p.name} sepete eklendi'),
-                                        backgroundColor: AppColors.success,
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                  onAddToCart: () => _showDimensionDialog(p),
                                   onInspect: () => _openProductModal(p),
                                 );
                               },
@@ -457,17 +872,7 @@ class _CatalogPageState extends State<CatalogPage> {
             },
             onAddToCart: () {
               if (_selectedProduct != null) {
-                context.read<CartProvider>().addItem(_selectedProduct!);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${_selectedProduct!.name} sepete eklendi'),
-                    backgroundColor: AppColors.success,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                );
+                _showDimensionDialog(_selectedProduct!);
               }
             },
             isFavorite: _selectedProduct != null ? _isFavorite(_selectedProduct!) : false,

@@ -40,10 +40,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
+
                     ),
                     child: Image.asset('assets/logo1.jpg', height: 28),
                   ),

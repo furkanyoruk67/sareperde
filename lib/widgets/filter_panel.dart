@@ -41,7 +41,7 @@ class FilterPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 320,
+      width: 280,
       height: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -57,21 +57,21 @@ class FilterPanel extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         child: Column(
           children: [
             // Panel başlığı
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.primary,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.primary.withOpacity(0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -80,13 +80,13 @@ class FilterPanel extends StatelessWidget {
                   Icon(
                     Icons.filter_alt,
                     color: AppColors.surface,
-                    size: 20,
+                    size: 18,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   const Text(
-                    'PERDE FİLTRELERİ',
+                    'FİLTRELER',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColors.surface,
                       letterSpacing: 0.5,
@@ -95,12 +95,12 @@ class FilterPanel extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
             // Kaydırılabilir filtre alanı
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Column(
                   children: [
                     _buildFilterCard('Kategori', ProductData.categories, selectedCategories, onCategoryChanged),
@@ -110,7 +110,7 @@ class FilterPanel extends StatelessWidget {
                     _buildFilterCard('Renk', ProductData.colors, selectedColors, onColorChanged),
                     _buildFilterCard('Marka', ProductData.brands, selectedBrands, onBrandChanged),
                     _buildPriceCard(),
-                    const SizedBox(height: 80), // butondan ayrışsın
+                    const SizedBox(height: 60), // butondan ayrışsın
                   ],
                 ),
               ),
@@ -121,23 +121,23 @@ class FilterPanel extends StatelessWidget {
               top: false,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: ElevatedButton.icon(
                   onPressed: onApplyFilters,
-                  icon: const Icon(Icons.filter_alt, size: 20),
+                  icon: const Icon(Icons.filter_alt, size: 18),
                   label: const Text(
                     'Filtrele',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.surface,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     elevation: 0,
                     shadowColor: AppColors.primary.withOpacity(0.3),
@@ -154,28 +154,28 @@ class FilterPanel extends StatelessWidget {
   Widget _buildFilterCard(String title, List<String> items, Set<String> selection, Function(String, bool) onChanged) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: ExpansionTile(
-        initiallyExpanded: true,
-        tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        initiallyExpanded: false,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        childrenPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         title: Text(
           title,
           style: const TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 16,
+            fontSize: 14,
             color: AppColors.textPrimary,
           ),
         ),
@@ -184,7 +184,7 @@ class FilterPanel extends StatelessWidget {
           return CheckboxListTile(
             dense: true,
             controlAffinity: ListTileControlAffinity.leading,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             value: checked,
             onChanged: (val) {
               onChanged(e, val == true);
@@ -192,7 +192,7 @@ class FilterPanel extends StatelessWidget {
             title: Text(
               e,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
@@ -208,29 +208,29 @@ class FilterPanel extends StatelessWidget {
   Widget _buildPriceCard() {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: ExpansionTile(
-        initiallyExpanded: true,
-        tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        initiallyExpanded: false,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: const Text(
           'Fiyat',
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 16,
+            fontSize: 14,
             color: AppColors.textPrimary,
           ),
         ),
@@ -254,7 +254,7 @@ class FilterPanel extends StatelessWidget {
               Text(
                 'Min: ${priceRange.start.toStringAsFixed(0)} ₺',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                 ),
@@ -262,14 +262,14 @@ class FilterPanel extends StatelessWidget {
               Text(
                 'Max: ${priceRange.end.toStringAsFixed(0)} ₺',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
         ],
       ),
     );
