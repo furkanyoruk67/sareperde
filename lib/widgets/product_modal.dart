@@ -46,6 +46,10 @@ class ProductModal extends StatelessWidget {
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.8,
                 height: MediaQuery.of(context).size.height * 0.8,
+                constraints: BoxConstraints(
+                  maxWidth: 1200,
+                  maxHeight: MediaQuery.of(context).size.height * 0.9,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -72,12 +76,14 @@ class ProductModal extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Ürün Detayı',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.grey[800],
+                          Expanded(
+                            child: Text(
+                              'Ürün Detayı',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.grey[800],
+                              ),
                             ),
                           ),
                           IconButton(
@@ -93,19 +99,41 @@ class ProductModal extends StatelessWidget {
                     ),
                     // Content
                     Expanded(
-                      child: Row(
-                        children: [
-                          // Left side - Image with zoom
-                          Expanded(
-                            flex: 1,
-                            child: _buildZoomableImage(),
-                          ),
-                          // Right side - Product details
-                          Expanded(
-                            flex: 1,
-                            child: _buildProductDetails(),
-                          ),
-                        ],
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Responsive layout: side-by-side on large screens, stacked on small screens
+                          if (constraints.maxWidth > 800) {
+                            return Row(
+                              children: [
+                                // Left side - Image with zoom
+                                Expanded(
+                                  flex: 1,
+                                  child: _buildZoomableImage(),
+                                ),
+                                // Right side - Product details
+                                Expanded(
+                                  flex: 1,
+                                  child: _buildProductDetails(),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Column(
+                              children: [
+                                // Top - Image with zoom
+                                Expanded(
+                                  flex: 1,
+                                  child: _buildZoomableImage(),
+                                ),
+                                // Bottom - Product details
+                                Expanded(
+                                  flex: 1,
+                                  child: _buildProductDetails(),
+                                ),
+                              ],
+                            );
+                          }
+                        },
                       ),
                     ),
                   ],
@@ -182,6 +210,8 @@ class ProductModal extends StatelessWidget {
               fontSize: 24,
               fontWeight: FontWeight.w700,
             ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
 
@@ -196,17 +226,26 @@ class ProductModal extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Product specifications
-          _buildSpecificationRow('Kategori', selectedProduct!.category),
-          _buildSpecificationRow('Ürün Tipi', selectedProduct!.productType),
-          _buildSpecificationRow('Ebat', selectedProduct!.size),
-          _buildSpecificationRow('Kalite', selectedProduct!.quality),
-          _buildSpecificationRow('Renk', selectedProduct!.color),
-          _buildSpecificationRow('Marka', selectedProduct!.brand),
+          // Scrollable product specifications
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product specifications
+                  _buildSpecificationRow('Kategori', selectedProduct!.category),
+                  _buildSpecificationRow('Ürün Tipi', selectedProduct!.productType),
+                  _buildSpecificationRow('Ebat', selectedProduct!.size),
+                  _buildSpecificationRow('Kalite', selectedProduct!.quality),
+                  _buildSpecificationRow('Renk', selectedProduct!.color),
+                  _buildSpecificationRow('Marka', selectedProduct!.brand),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
 
-          const Spacer(),
-
-          // Action buttons
+          // Action buttons (fixed at bottom)
           Row(
             children: [
               Expanded(

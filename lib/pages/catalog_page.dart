@@ -158,7 +158,14 @@ class _CatalogPageState extends State<CatalogPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => FavoritesPage(favoriteProducts: _favoriteProducts),
+                    builder: (context) => FavoritesPage(
+                      favoriteProducts: _favoriteProducts,
+                      onRemoveFromFavorites: (product) {
+                        setState(() {
+                          _favoriteProducts.remove(product);
+                        });
+                      },
+                    ),
                   ),
                 );
               },

@@ -28,23 +28,23 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => onHoverEnter(),
-      onExit: (_) => onHoverExit(),
-      child: Stack(
-        children: [
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: isHovered ? AppColors.primary : AppColors.border,
-                width: isHovered ? 2 : 1,
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            elevation: isHovered ? 8 : 2,
-            shadowColor: AppColors.shadowStrong,
-            child: Column(
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isHovered ? AppColors.primary : AppColors.border,
+          width: isHovered ? 2 : 1,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      elevation: isHovered ? 8 : 2,
+      shadowColor: AppColors.shadowStrong,
+      child: MouseRegion(
+        onEnter: (_) => onHoverEnter(),
+        onExit: (_) => onHoverExit(),
+        child: Stack(
+          children: [
+            Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
@@ -154,30 +154,17 @@ class ProductCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          // Inspect icon that appears on hover at the bottom of the image
-          if (isHovered)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      AppColors.shadowStrong,
-                    ],
-                  ),
-                ),
+            // View Product button positioned in upper half of the image
+            if (isHovered)
+              Positioned(
+                top: 20,
+                left: 0,
+                right: 0,
                 child: Center(
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
                           color: AppColors.shadowStrong,
@@ -186,24 +173,43 @@ class ProductCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: IconButton(
-                      onPressed: onInspect,
-                      icon: const Icon(
-                        Icons.zoom_in,
-                        color: AppColors.surface,
-                        size: 20,
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      constraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: onInspect,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.zoom_in,
+                                color: AppColors.surface,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Ürünü İncele',
+                                style: TextStyle(
+                                  color: AppColors.surface,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
