@@ -53,41 +53,41 @@ class ProductCard extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
+                                 Padding(
+                   padding: const EdgeInsets.all(6.0),
+                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         product.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: AppColors.textPrimary,
-                          height: 1.3,
-                        ),
+                                                 style: const TextStyle(
+                           fontWeight: FontWeight.w600,
+                           fontSize: 11,
+                           color: AppColors.textPrimary,
+                           height: 1.1,
+                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${product.brand} • ${product.color}',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${product.price.toStringAsFixed(0)} ₺',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
+                                             const SizedBox(height: 2),
+                       Text(
+                         '${product.brand} • ${product.color}',
+                         style: const TextStyle(
+                           color: AppColors.textSecondary,
+                           fontSize: 9,
+                           fontWeight: FontWeight.w500,
+                         ),
+                       ),
+                       const SizedBox(height: 3),
+                       Text(
+                         '${product.price.toStringAsFixed(0)} ₺',
+                         style: const TextStyle(
+                           fontWeight: FontWeight.bold,
+                           fontSize: 12,
+                           color: AppColors.primary,
+                         ),
+                       ),
+                       const SizedBox(height: 4),
                       // Add to Favorites button
                       SizedBox(
                         width: double.infinity,
@@ -95,12 +95,13 @@ class ProductCard extends StatelessWidget {
                           onPressed: onToggleFavorite,
                           icon: Icon(
                             isFavorite ? Icons.favorite : Icons.favorite_border,
-                            size: 16,
+                            size: 14,
                             color: isFavorite ? AppColors.error : AppColors.textSecondary,
                           ),
                           label: Text(
                             isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle',
                             style: TextStyle(
+                              fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: isFavorite ? AppColors.error : AppColors.textSecondary,
                             ),
@@ -110,15 +111,15 @@ class ProductCard extends StatelessWidget {
                             side: BorderSide(
                               color: isFavorite ? AppColors.error : AppColors.border,
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 4),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Add to Cart button
+                                             ),
+                       const SizedBox(height: 4),
+                       // Add to Cart button
                       Consumer<CartProvider>(
                         builder: (context, cartProvider, child) {
                           final isInCart = cartProvider.isInCart(product);
@@ -130,19 +131,19 @@ class ProductCard extends StatelessWidget {
                               onPressed: onAddToCart,
                               icon: Icon(
                                 isInCart ? Icons.check : Icons.shopping_cart,
-                                size: 16,
+                                size: 14,
                               ),
                               label: Text(
                                 isInCart ? 'Sepette (${quantity})' : 'Sepete Ekle',
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isInCart ? AppColors.success : AppColors.primary,
                                 foregroundColor: AppColors.surface,
-                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(vertical: 4),
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                             ),

@@ -18,6 +18,7 @@ class FilterPanel extends StatelessWidget {
   final Function(String, bool) onColorChanged;
   final Function(String, bool) onBrandChanged;
   final VoidCallback onApplyFilters;
+  final VoidCallback? onClose;
 
   const FilterPanel({
     Key? key,
@@ -36,6 +37,7 @@ class FilterPanel extends StatelessWidget {
     required this.onColorChanged,
     required this.onBrandChanged,
     required this.onApplyFilters,
+    this.onClose,
   }) : super(key: key);
 
   @override
@@ -83,15 +85,37 @@ class FilterPanel extends StatelessWidget {
                     size: 18,
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'FİLTRELER',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.surface,
-                      letterSpacing: 0.5,
+                  const Expanded(
+                    child: Text(
+                      'FİLTRELER',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.surface,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
+                  if (onClose != null)
+                    IconButton(
+                      onPressed: onClose,
+                      icon: const Icon(
+                        Icons.close,
+                        color: AppColors.surface,
+                        size: 20,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.surface.withOpacity(0.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
