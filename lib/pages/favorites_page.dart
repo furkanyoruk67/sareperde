@@ -198,7 +198,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           ElevatedButton.icon(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.shopping_bag),
-            label: const Text('Kataloğa Dön'),
+            label: const Text('Anasayfaya Dön'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.surface,

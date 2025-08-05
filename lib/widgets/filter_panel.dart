@@ -19,6 +19,7 @@ class FilterPanel extends StatelessWidget {
   final Function(String, bool) onBrandChanged;
   final VoidCallback onApplyFilters;
   final VoidCallback? onClose;
+  final VoidCallback? onResetFilters;
 
   const FilterPanel({
     Key? key,
@@ -38,6 +39,7 @@ class FilterPanel extends StatelessWidget {
     required this.onBrandChanged,
     required this.onApplyFilters,
     this.onClose,
+    this.onResetFilters,
   }) : super(key: key);
 
   @override
@@ -140,32 +142,67 @@ class FilterPanel extends StatelessWidget {
               ),
             ),
 
-            // Kaydırılamayan sabit "Filtrele" butonu
+            // Kaydırılamayan sabit butonlar
             SafeArea(
               top: false,
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
-                child: ElevatedButton.icon(
-                  onPressed: onApplyFilters,
-                  icon: const Icon(Icons.filter_alt, size: 18),
-                  label: const Text(
-                    'Filtrele',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                child: Column(
+                  children: [
+                    // Filtrele butonu
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: onApplyFilters,
+                        icon: const Icon(Icons.filter_alt, size: 18),
+                        label: const Text(
+                          'Filtrele',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.surface,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                          shadowColor: AppColors.primary.withOpacity(0.3),
+                        ),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 0,
-                    shadowColor: AppColors.primary.withOpacity(0.3),
-                  ),
+                    const SizedBox(height: 8),
+                    // Filtreyi Sıfırla butonu
+                    if (onResetFilters != null)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: onResetFilters,
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text(
+                            'Filtreyi Sıfırla',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.surface,
+                            foregroundColor: AppColors.textSecondary,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: AppColors.border),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
