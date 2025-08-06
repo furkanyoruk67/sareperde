@@ -11,7 +11,6 @@ import '../widgets/product_card.dart';
 import '../widgets/product_modal.dart';
 import 'cart_page.dart';
 import 'favorites_page.dart';
-import '../widgets/login_dialog.dart';
 import '../widgets/dimension_dialog.dart';
 
 enum SortOption {
@@ -482,7 +481,7 @@ class _CatalogPageState extends State<CatalogPage> {
              child: const Text('Kategoriler', style: TextStyle(fontWeight: FontWeight.w600)),
            ),
            const SizedBox(width: 8),
-                     TextButton(
+           /* TextButton(
              onPressed: () {
                showDialog(context: context, builder: (context) => const LoginDialog());
              },
@@ -492,9 +491,9 @@ class _CatalogPageState extends State<CatalogPage> {
                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
              ),
              child: const Text('Giriş Yap / Üye Ol', style: TextStyle(fontWeight: FontWeight.w600)),
-           ),
+           ), */
            const SizedBox(width: 8),
-           Container(
+           /* Container(
              margin: const EdgeInsets.only(right: 8),
              decoration: BoxDecoration(
                color: AppColors.surfaceVariant,
@@ -552,7 +551,7 @@ class _CatalogPageState extends State<CatalogPage> {
                 ],
               ),
             ),
-          ),
+          ), */
           Container(
             margin: const EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
@@ -606,7 +605,7 @@ class _CatalogPageState extends State<CatalogPage> {
                  child: HeroSlider(
                    images: [
                      'assets/hero_slider.jpg',
-                     'assets/gorsel1.jpg',
+                     /*'assets/gorsel1.jpg',*/
                      /*'assets/hero_slider3.jpg',*/
                      // Add more image paths here as needed
                    ],
@@ -791,10 +790,10 @@ class _CatalogPageState extends State<CatalogPage> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                                                 SizedBox(
-                           height: 40,
-                           width: 120,
-                           child: Stack(
+                        SizedBox(
+                          height: 40,
+                          width: 120,
+                          child: Stack(
                             children: [
                               SizedBox(
                                 width: double.infinity,
@@ -1017,53 +1016,52 @@ class _CatalogPageState extends State<CatalogPage> {
       ),
       floatingActionButton: _isFilterPanelVisible 
           ? null 
-          : Consumer<CartProvider>(
-              builder: (context, cartProvider, child) {
-                return FloatingActionButton.extended(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CartPage()),
-                    );
-                  },
-                  label: Text(
-                    'Sepetim${cartProvider.itemCount > 0 ? ' (${cartProvider.itemCount})' : ''}',
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                  ),
-                  icon: Stack(
-                    children: [
-                      const Icon(Icons.shopping_cart, size: 20),
-                      if (cartProvider.itemCount > 0)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: AppColors.error,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                            child: Text(
-                              '${cartProvider.itemCount}',
-                              style: const TextStyle(
-                                color: AppColors.surface,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                );
-              },
-            ),
+          : null, // Consumer<CartProvider>(
+              // builder: (context, cartProvider, child) {
+              //   return FloatingActionButton.extended(
+              //     onPressed: () {
+              //       Navigator.push(
+              //         context,
+              //         MaterialPageRoute(builder: (context) => const CartPage()),
+              //       );
+              //     },
+              //     label: Text(
+              //       'Sepetim${cartProvider.itemCount > 0 ? ' (${cartProvider.itemCount})' : ''}',
+              //       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              //     ),
+              //     icon: Stack(
+              //       children: [
+              //         const Icon(Icons.shopping_cart, size: 20),
+              //         if (cartProvider.itemCount > 0)
+              //           Positioned(
+              //             right: 0,
+              //             top: 0,
+              //             child: Container(
+              //               padding: const EdgeInsets.all(4),
+              //               decoration: BoxDecoration(
+              //                 color: AppColors.error,
+              //                 borderRadius: BorderRadius.circular(10),
+              //               ),
+              //               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              //               child: Text(
+              //                 '${cartProvider.itemCount}',
+              //                 style: const TextStyle(
+              //                   color: AppColors.surface,
+              //                   fontSize: 10,
+              //                   fontWeight: FontWeight.bold,
+              //               ),
+              //               textAlign: TextAlign.center,
+              //             ),
+              //           ),
+              //       ],
+              //     ),
+              //     backgroundColor: AppColors.primary,
+              //     foregroundColor: AppColors.surface,
+              //     elevation: 8,
+              //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              //   );
+              // },
+              // ),
     );
   }
 } 
