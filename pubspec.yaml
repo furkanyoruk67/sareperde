@@ -40,6 +40,9 @@ dependencies:
   
   # URL launcher for external links
   url_launcher: ^6.2.5
+  
+  # Video player for video content
+  video_player: ^2.8.3
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +73,7 @@ flutter:
     - assets/products/perde1.png
     - assets/products/perde2.png
     - assets/products/perde3.png
+    - assets/videos/tanitim.mp4
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

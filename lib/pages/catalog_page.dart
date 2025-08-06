@@ -5,11 +5,13 @@ import '../constants/app_colors.dart';
 import '../data/product_data.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../widgets/filter_panel.dart';
-import '../widgets/hero_slider.dart';
+import '../widgets/video_player_widget.dart';
+import '../widgets/video_showcase_section.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_modal.dart';
-import 'cart_page.dart';
+// import 'cart_page.dart'; // Commented out as cart functionality is disabled
 import 'favorites_page.dart';
 import '../widgets/dimension_dialog.dart';
 
@@ -41,7 +43,6 @@ class _CatalogPageState extends State<CatalogPage> {
   int? _hoveredProductIndex;
   Product? _selectedProduct;
   bool _isModalOpen = false;
-  final Set<Product> _favoriteProducts = {};
   final TextEditingController _searchController = TextEditingController();
   bool _isSearchFocused = false;
   bool _hasActiveFilters = false;
@@ -138,16 +139,16 @@ class _CatalogPageState extends State<CatalogPage> {
 
   void _toggleFavorite(Product product) {
     setState(() {
-      if (_favoriteProducts.contains(product)) {
-        _favoriteProducts.remove(product);
+      if (context.read<FavoritesProvider>().isFavorite(product)) {
+        context.read<FavoritesProvider>().removeFavorite(product);
       } else {
-        _favoriteProducts.add(product);
+        context.read<FavoritesProvider>().addFavorite(product);
       }
     });
   }
 
   bool _isFavorite(Product product) {
-    return _favoriteProducts.contains(product);
+    return context.read<FavoritesProvider>().isFavorite(product);
   }
 
   void _showDimensionDialog(Product product) {
@@ -493,7 +494,7 @@ class _CatalogPageState extends State<CatalogPage> {
              child: const Text('Giriş Yap / Üye Ol', style: TextStyle(fontWeight: FontWeight.w600)),
            ), */
            const SizedBox(width: 8),
-           /* Container(
+           Container(
              margin: const EdgeInsets.only(right: 8),
              decoration: BoxDecoration(
                color: AppColors.surfaceVariant,
@@ -506,11 +507,9 @@ class _CatalogPageState extends State<CatalogPage> {
                    context,
                    MaterialPageRoute(
                      builder: (context) => FavoritesPage(
-                       favoriteProducts: _favoriteProducts,
+                       favoriteProducts: context.read<FavoritesProvider>().favorites,
                        onRemoveFromFavorites: (product) {
-                         setState(() {
-                           _favoriteProducts.remove(product);
-                         });
+                         context.read<FavoritesProvider>().removeFavorite(product);
                        },
                      ),
                    ),
@@ -519,7 +518,7 @@ class _CatalogPageState extends State<CatalogPage> {
               icon: Stack(
                 children: [
                   Icon(Icons.favorite_border, color: AppColors.textSecondary, size: 22),
-                  if (_favoriteProducts.isNotEmpty)
+                  if (context.read<FavoritesProvider>().favorites.isNotEmpty)
                     Positioned(
                       right: 0,
                       top: 0,
@@ -538,7 +537,7 @@ class _CatalogPageState extends State<CatalogPage> {
                         ),
                         constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                         child: Text(
-                          '${_favoriteProducts.length}',
+                          '${context.read<FavoritesProvider>().favorites.length}',
                           style: const TextStyle(
                             color: AppColors.surface,
                             fontSize: 10,
@@ -551,7 +550,7 @@ class _CatalogPageState extends State<CatalogPage> {
                 ],
               ),
             ),
-          ), */
+          ),
           Container(
             margin: const EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
@@ -598,21 +597,9 @@ class _CatalogPageState extends State<CatalogPage> {
            children: [
              CustomScrollView(
            slivers: [
-             // Sticky Hero Slider
+             // Video and Product Showcase Section
              SliverToBoxAdapter(
-               child: Container(
-                 padding: const EdgeInsets.all(16),
-                 child: HeroSlider(
-                   images: [
-                     'assets/hero_slider.jpg',
-                     /*'assets/gorsel1.jpg',*/
-                     /*'assets/hero_slider3.jpg',*/
-                     // Add more image paths here as needed
-                   ],
-                   height: 300,
-                   autoPlay: true, // Enable auto-play for multiple images
-                 ),
-               ),
+               child: VideoShowcaseSection(),
              ),
              
              // Products Section
@@ -891,7 +878,7 @@ class _CatalogPageState extends State<CatalogPage> {
                        onHoverEnter: () => setState(() => _hoveredProductIndex = index),
                        onHoverExit: () => setState(() => _hoveredProductIndex = null),
                        onToggleFavorite: () => _toggleFavorite(p),
-                       onAddToCart: () => _showDimensionDialog(p),
+                       onAddToCart: () {}, // Add to Cart functionality commented out
                        onInspect: () => _openProductModal(p),
                      );
                    },
@@ -1005,9 +992,10 @@ class _CatalogPageState extends State<CatalogPage> {
               }
             },
             onAddToCart: () {
-              if (_selectedProduct != null) {
+              // Add to Cart functionality commented out
+              /* if (_selectedProduct != null) {
                 _showDimensionDialog(_selectedProduct!);
-              }
+              } */
             },
             isFavorite: _selectedProduct != null ? _isFavorite(_selectedProduct!) : false,
           ),

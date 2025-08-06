@@ -95,7 +95,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
               ),
             ],
           ),
-          floatingActionButton: Consumer<CartProvider>(
+          floatingActionButton: null, // Cart floating action button commented out
+          /* Consumer<CartProvider>(
             builder: (context, cartProvider, child) {
               return FloatingActionButton.extended(
                 onPressed: () {
@@ -151,7 +152,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 ),
               );
             },
-          ),
+          ), */
         ),
         _buildProductModal(),
       ],
@@ -333,7 +334,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 ),
                                 const SizedBox(height: 8),
                                 // Add to Cart button
-                                Consumer<CartProvider>(
+                                /* Consumer<CartProvider>(
                                   builder: (context, cartProvider, child) {
                                     final isInCart = cartProvider.isInCart(product);
                                     final quantity = cartProvider.getQuantity(product);
@@ -371,7 +372,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                       ),
                                     );
                                   },
-                                ),
+                                ), */
                               ],
                             ),
                           ),
@@ -474,7 +475,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
         }
       },
       onAddToCart: () {
-        if (_selectedProduct != null) {
+        // Add to Cart functionality commented out
+        /* if (_selectedProduct != null) {
           context.read<CartProvider>().addItem(_selectedProduct!);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -482,7 +484,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               backgroundColor: AppColors.success,
             ),
           );
-        }
+        } */
       },
       isFavorite: _selectedProduct != null ? widget.favoriteProducts.contains(_selectedProduct!) : false,
     );

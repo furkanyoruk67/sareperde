@@ -120,7 +120,7 @@ class ProductCard extends StatelessWidget {
                                              ),
                        const SizedBox(height: 4),
                        // Add to Cart button
-                      Consumer<CartProvider>(
+                      /* Consumer<CartProvider>(
                         builder: (context, cartProvider, child) {
                           final isInCart = cartProvider.isInCart(product);
                           final quantity = cartProvider.getQuantity(product);
@@ -149,7 +149,7 @@ class ProductCard extends StatelessWidget {
                             ),
                           );
                         },
-                      ),
+                      ), */
                     ],
                   ),
                 ),

@@ -264,7 +264,7 @@ class ProductModal extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 flex: 2,
-                child: Consumer<CartProvider>(
+                child: /* Consumer<CartProvider>(
                   builder: (context, cartProvider, child) {
                     final isInCart = selectedProduct != null && cartProvider.isInCart(selectedProduct!);
                     final quantity = selectedProduct != null ? cartProvider.getQuantity(selectedProduct!) : 0;
@@ -283,7 +283,8 @@ class ProductModal extends StatelessWidget {
                       ),
                     );
                   },
-                ),
+                ), */
+                Container(), // Placeholder for commented out Add to Cart button
               ),
             ],
           ),
