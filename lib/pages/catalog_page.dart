@@ -604,9 +604,14 @@ class _CatalogPageState extends State<CatalogPage> {
                child: Container(
                  padding: const EdgeInsets.all(16),
                  child: HeroSlider(
-                   images: ['assets/hero_slider.jpg'],
+                   images: [
+                     'assets/hero_slider.jpg',
+                     'assets/gorsel1.jpg',
+                     /*'assets/hero_slider3.jpg',*/
+                     // Add more image paths here as needed
+                   ],
                    height: 300,
-                   autoPlay: false, // Single image, no auto-play needed
+                   autoPlay: true, // Enable auto-play for multiple images
                  ),
                ),
              ),
