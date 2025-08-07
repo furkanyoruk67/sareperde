@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
@@ -147,13 +148,12 @@ class _CatalogPageState extends State<CatalogPage> {
   }
 
   void _toggleFavorite(Product product) {
-    setState(() {
-      if (context.read<FavoritesProvider>().isFavorite(product)) {
-        context.read<FavoritesProvider>().removeFavorite(product);
-      } else {
-        context.read<FavoritesProvider>().addFavorite(product);
-      }
-    });
+    final favoritesProvider = context.read<FavoritesProvider>();
+    if (favoritesProvider.isFavorite(product)) {
+      favoritesProvider.removeFavorite(product);
+    } else {
+      favoritesProvider.addFavorite(product);
+    }
   }
 
   bool _isFavorite(Product product) {
@@ -369,10 +369,11 @@ class _CatalogPageState extends State<CatalogPage> {
                    'SARE PERDE',
                    style: TextStyle(
                      fontSize: 32,
-                     fontWeight: FontWeight.w700,
+                     fontWeight: FontWeight.w300,
                      color: Colors.black,
-                     letterSpacing: 1.5,
-                     fontFamily: 'Arial, sans-serif',
+                     letterSpacing: 2.0,
+                     fontFamily: 'Candara, sans-serif',
+                     fontStyle: FontStyle.italic,
                      shadows: [
                        Shadow(
                          color: AppColors.shadowMedium,
@@ -514,48 +515,47 @@ class _CatalogPageState extends State<CatalogPage> {
                  Navigator.push(
                    context,
                    MaterialPageRoute(
-                     builder: (context) => FavoritesPage(
-                       favoriteProducts: context.read<FavoritesProvider>().favorites,
-                       onRemoveFromFavorites: (product) {
-                         context.read<FavoritesProvider>().removeFavorite(product);
-                       },
-                     ),
+                     builder: (context) => const FavoritesPage(),
                    ),
                  );
                },
-              icon: Stack(
-                children: [
-                  Icon(Icons.favorite_border, color: AppColors.textSecondary, size: 22),
-                  if (context.read<FavoritesProvider>().favorites.isNotEmpty)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: AppColors.error,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.shadowMedium,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+              icon: Consumer<FavoritesProvider>(
+                builder: (context, favoritesProvider, child) {
+                  return Stack(
+                    children: [
+                      Icon(Icons.favorite_border, color: AppColors.textSecondary, size: 22),
+                      if (favoritesProvider.favorites.isNotEmpty)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppColors.error,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.shadowMedium,
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                        child: Text(
-                          '${context.read<FavoritesProvider>().favorites.length}',
-                          style: const TextStyle(
-                            color: AppColors.surface,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                            child: Text(
+                              '${favoritesProvider.favorites.length}',
+                              style: const TextStyle(
+                                color: AppColors.surface,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ),
-                ],
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -604,19 +604,55 @@ class _CatalogPageState extends State<CatalogPage> {
                child: Container(
                  width: double.infinity,
                  height: 300,
-                 child: YoutubePlayer(
-                   controller: YoutubePlayerController.fromVideoId(
-                     videoId: 'rOk0pK6KrCg',
-                     params: const YoutubePlayerParams(
-                       showControls: true,
-                       showFullscreenButton: true,
-                       mute: false,
-                       enableCaption: false,
-                       showVideoAnnotations: false,
+                 child: kIsWeb 
+                   ? YoutubePlayer(
+                       controller: YoutubePlayerController.fromVideoId(
+                         videoId: 'rOk0pK6KrCg',
+                         params: const YoutubePlayerParams(
+                           showControls: true,
+                           showFullscreenButton: true,
+                           mute: false,
+                           enableCaption: false,
+                           showVideoAnnotations: false,
+                         ),
+                       ),
+                       aspectRatio: 16 / 9,
+                     )
+                   : Container(
+                       decoration: BoxDecoration(
+                         color: AppColors.surfaceVariant,
+                         borderRadius: BorderRadius.circular(12),
+                       ),
+                       child: Center(
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             Icon(
+                               Icons.play_circle_outline,
+                               size: 64,
+                               color: AppColors.textSecondary,
+                             ),
+                             const SizedBox(height: 16),
+                             Text(
+                               'Video Player',
+                               style: TextStyle(
+                                 fontSize: 18,
+                                 fontWeight: FontWeight.w600,
+                                 color: AppColors.textSecondary,
+                               ),
+                             ),
+                             const SizedBox(height: 8),
+                             Text(
+                               'Web platformunda video izleyebilirsiniz',
+                               style: TextStyle(
+                                 fontSize: 14,
+                                 color: AppColors.textSecondary,
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
                      ),
-                   ),
-                   aspectRatio: 16 / 9,
-                 ),
                ),
              ),
                
@@ -894,15 +930,19 @@ class _CatalogPageState extends State<CatalogPage> {
                      final p = _visibleProducts[index];
                      final isHovered = _hoveredProductIndex == index;
 
-                     return ProductCard(
-                       product: p,
-                       isHovered: isHovered,
-                       isFavorite: _isFavorite(p),
-                       onHoverEnter: () => setState(() => _hoveredProductIndex = index),
-                       onHoverExit: () => setState(() => _hoveredProductIndex = null),
-                       onToggleFavorite: () => _toggleFavorite(p),
-                       onAddToCart: () {}, // Add to Cart functionality commented out
-                       onInspect: () => _openProductModal(p),
+                     return Consumer<FavoritesProvider>(
+                       builder: (context, favoritesProvider, child) {
+                         return ProductCard(
+                           product: p,
+                           isHovered: isHovered,
+                           isFavorite: favoritesProvider.isFavorite(p),
+                           onHoverEnter: () => setState(() => _hoveredProductIndex = index),
+                           onHoverExit: () => setState(() => _hoveredProductIndex = null),
+                           onToggleFavorite: () => _toggleFavorite(p),
+                           onAddToCart: () {}, // Add to Cart functionality commented out
+                           onInspect: () => _openProductModal(p),
+                         );
+                       },
                      );
                    },
                    childCount: _visibleProducts.length,
@@ -1005,32 +1045,37 @@ class _CatalogPageState extends State<CatalogPage> {
                 ),
               ),
             ),
-          ProductModal(
-            selectedProduct: _selectedProduct,
-            isModalOpen: _isModalOpen,
-            onClose: _closeProductModal,
-            onToggleFavorite: () {
-              if (_selectedProduct != null) {
-                _toggleFavorite(_selectedProduct!);
-              }
+          Consumer<FavoritesProvider>(
+            builder: (context, favoritesProvider, child) {
+              return ProductModal(
+                selectedProduct: _selectedProduct,
+                isModalOpen: _isModalOpen,
+                onClose: _closeProductModal,
+                onToggleFavorite: () {
+                  if (_selectedProduct != null) {
+                    _toggleFavorite(_selectedProduct!);
+                  }
+                },
+                onAddToCart: () {
+                  // Add to Cart functionality commented out
+                  /* if (_selectedProduct != null) {
+                    _showDimensionDialog(_selectedProduct!);
+                  } */
+                },
+                isFavorite: _selectedProduct != null ? favoritesProvider.isFavorite(_selectedProduct!) : false,
+              );
             },
-            onAddToCart: () {
-              // Add to Cart functionality commented out
-              /* if (_selectedProduct != null) {
-                _showDimensionDialog(_selectedProduct!);
-              } */
-            },
-            isFavorite: _selectedProduct != null ? _isFavorite(_selectedProduct!) : false,
           ),
           
           // Sticky Video Player - Positioned at the very end for highest z-index
-          StickyVideoPlayer(
-            videoId: 'rOk0pK6KrCg', // Replace with your actual video ID
-            initialHeight: 300,
-            stickyHeight: 180,
-            autoPlay: true,
-            scrollController: _scrollController,
-          ),
+          if (kIsWeb)
+            StickyVideoPlayer(
+              videoId: 'dQw4w9WgXcQ', // Using a reliable test video ID
+              initialHeight: 300,
+              stickyHeight: 180,
+              autoPlay: true,
+              scrollController: _scrollController,
+            ),
         ],
       ),
       floatingActionButton: _isFilterPanelVisible 

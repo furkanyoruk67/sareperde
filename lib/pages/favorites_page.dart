@@ -3,18 +3,12 @@ import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../widgets/product_modal.dart';
 import 'cart_page.dart';
 
 class FavoritesPage extends StatefulWidget {
-  final Set<Product> favoriteProducts;
-  final Function(Product) onRemoveFromFavorites;
-
-  const FavoritesPage({
-    Key? key, 
-    required this.favoriteProducts,
-    required this.onRemoveFromFavorites,
-  }) : super(key: key);
+  const FavoritesPage({Key? key}) : super(key: key);
 
   @override
   State<FavoritesPage> createState() => _FavoritesPageState();
@@ -27,135 +21,139 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            backgroundColor: AppColors.surface,
-            surfaceTintColor: AppColors.surface,
-            titleSpacing: 0,
-            title: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Container(
-
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-
-                    ),
-                    child: Image.asset('assets/logo1.jpg', height: 28),
+    return Consumer<FavoritesProvider>(
+      builder: (context, favoritesProvider, child) {
+        final favoriteProducts = favoritesProvider.favorites;
+        
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: AppBar(
+                elevation: 0,
+                backgroundColor: AppColors.surface,
+                surfaceTintColor: AppColors.surface,
+                titleSpacing: 0,
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                        ),
+                        child: Image.asset('assets/logo1.jpg', height: 28),
+                      ),
+                      const SizedBox(width: 16),
+                      const Text(
+                        'Favorilerim',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  const Text(
-                    'Favorilerim',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.5,
+                ),
+                leading: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
+                ),
+              ),
+              body: Column(
+                children: [
+                  // Header
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    color: AppColors.surfaceVariant,
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        Icon(Icons.favorite, color: AppColors.error, size: 24),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Favorilerim (${favoriteProducts.length})',
+                          style: const TextStyle(
+                            fontSize: 20, 
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  // Content
+                  Expanded(
+                    child: favoriteProducts.isEmpty
+                        ? _buildEmptyState()
+                        : _buildFavoritesGrid(favoriteProducts, favoritesProvider),
                   ),
                 ],
               ),
-            ),
-            leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
-            ),
-          ),
-          body: Column(
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                color: AppColors.surfaceVariant,
-                width: double.infinity,
-                child: Row(
-                  children: [
-                    Icon(Icons.favorite, color: AppColors.error, size: 24),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Favorilerim (${widget.favoriteProducts.length})',
+              floatingActionButton: null, // Cart floating action button commented out
+              /* Consumer<CartProvider>(
+                builder: (context, cartProvider, child) {
+                  return FloatingActionButton.extended(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CartPage(),
+                        ),
+                      );
+                    },
+                    label: Text(
+                      'Sepetim${cartProvider.itemCount > 0 ? ' (${cartProvider.itemCount})' : ''}',
                       style: const TextStyle(
-                        fontSize: 20, 
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              // Content
-              Expanded(
-                child: widget.favoriteProducts.isEmpty
-                    ? _buildEmptyState()
-                    : _buildFavoritesGrid(),
-              ),
-            ],
-          ),
-          floatingActionButton: null, // Cart floating action button commented out
-          /* Consumer<CartProvider>(
-            builder: (context, cartProvider, child) {
-              return FloatingActionButton.extended(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CartPage(),
+                    icon: Stack(
+                      children: [
+                        const Icon(Icons.shopping_cart, size: 20),
+                        if (cartProvider.itemCount > 0)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: AppColors.error,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Text(
+                                '${cartProvider.itemCount}',
+                                style: const TextStyle(
+                                  color: AppColors.surface,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.surface,
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   );
                 },
-                label: Text(
-                  'Sepetim${cartProvider.itemCount > 0 ? ' (${cartProvider.itemCount})' : ''}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                icon: Stack(
-                  children: [
-                    const Icon(Icons.shopping_cart, size: 20),
-                    if (cartProvider.itemCount > 0)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: AppColors.error,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: Text(
-                            '${cartProvider.itemCount}',
-                            style: const TextStyle(
-                              color: AppColors.surface,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.surface,
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              );
-            },
-          ), */
-        ),
-        _buildProductModal(),
-      ],
+              ), */
+            ),
+            _buildProductModal(favoritesProvider),
+          ],
+        );
+      },
     );
   }
 
@@ -214,7 +212,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  Widget _buildFavoritesGrid() {
+  Widget _buildFavoritesGrid(Set<Product> favoriteProducts, FavoritesProvider favoritesProvider) {
     return LayoutBuilder(
       builder: (context, constraints) {
         int crossAxisCount = 3;
@@ -229,7 +227,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         return Padding(
           padding: const EdgeInsets.all(12.0),
           child: GridView.builder(
-            itemCount: widget.favoriteProducts.length,
+            itemCount: favoriteProducts.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 12,
@@ -237,7 +235,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               childAspectRatio: 0.70,
             ),
             itemBuilder: (context, index) {
-              final product = widget.favoriteProducts.elementAt(index);
+              final product = favoriteProducts.elementAt(index);
               final isHovered = _hoveredProducts[product] ?? false;
 
               return Card(
@@ -305,7 +303,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                   width: double.infinity,
                                   child: OutlinedButton.icon(
                                     onPressed: () {
-                                      widget.onRemoveFromFavorites(product);
+                                      favoritesProvider.removeFromFavorites(product);
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text('${product.name} favorilerden çıkarıldı'),
@@ -449,7 +447,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   }
 
   // Product Modal
-  Widget _buildProductModal() {
+  Widget _buildProductModal(FavoritesProvider favoritesProvider) {
     return ProductModal(
       selectedProduct: _selectedProduct,
       isModalOpen: _isModalOpen,
@@ -461,7 +459,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       },
       onToggleFavorite: () {
         if (_selectedProduct != null) {
-          widget.onRemoveFromFavorites(_selectedProduct!);
+          favoritesProvider.removeFromFavorites(_selectedProduct!);
           setState(() {
             _isModalOpen = false;
             _selectedProduct = null;
@@ -486,7 +484,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           );
         } */
       },
-      isFavorite: _selectedProduct != null ? widget.favoriteProducts.contains(_selectedProduct!) : false,
+      isFavorite: _selectedProduct != null ? favoritesProvider.isFavorite(_selectedProduct!) : false,
     );
   }
 }
