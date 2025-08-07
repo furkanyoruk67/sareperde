@@ -5,7 +5,7 @@ import '../constants/app_colors.dart';
 import '../data/product_data.dart';
 import '../models/product.dart';
 import '../providers/favorites_provider.dart';
-import 'video_player_widget.dart';
+
 import 'product_card.dart';
 
 class VideoShowcaseSection extends StatefulWidget {
@@ -130,18 +130,6 @@ class _VideoShowcaseSectionState extends State<VideoShowcaseSection> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Video Player (full width)
-          Container(
-            height: 250,
-            width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 16),
-            child: VideoPlayerWidget(
-              videoPath: 'assets/videos/tanitim.mp4',
-              height: 250,
-              autoPlay: true,
-            ),
-          ),
-          
           // Product Showcase (full width)
           Container(
             height: 300,
@@ -291,26 +279,11 @@ class _VideoShowcaseSectionState extends State<VideoShowcaseSection> {
   Widget _buildDesktopLayout() {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
         children: [
-          // Left Half - Video Player
-          Expanded(
-            flex: 1,
-            child: Container(
-              height: 400,
-              margin: const EdgeInsets.only(right: 16),
-              child: VideoPlayerWidget(
-                videoPath: 'assets/videos/tanitim.mp4',
-                height: 400,
-                autoPlay: true,
-              ),
-            ),
-          ),
           
-          // Right Half - Product Showcase
-          Expanded(
-            flex: 1,
-            child: Container(
+          // Product Showcase (full width)
+          Container(
               height: 400,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -448,7 +421,6 @@ class _VideoShowcaseSectionState extends State<VideoShowcaseSection> {
                 ],
               ),
             ),
-          ),
         ],
       ),
     );

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
+import 'package:flutter/foundation.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import '../constants/app_colors.dart';
-import 'dart:async'; // Added for Timer
 
 class VideoPlayerWidget extends StatefulWidget {
-  final String videoPath;
+  final String videoId;
   final double height;
   final bool autoPlay;
 
   const VideoPlayerWidget({
     super.key,
-    required this.videoPath,
+    required this.videoId,
     this.height = 300,
     this.autoPlay = true,
   });
@@ -21,135 +20,49 @@ class VideoPlayerWidget extends StatefulWidget {
 }
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  late VideoPlayerController _controller;
+  late YoutubePlayerController _controller;
   bool _isInitialized = false;
-  bool _isPlaying = false;
-  bool _isMuted = false;
   bool _hasError = false;
   String _errorMessage = '';
-  Duration _currentPosition = Duration.zero;
-  Duration _totalDuration = Duration.zero;
-  bool _showControls = false;
-  Timer? _controlsTimer;
 
   @override
   void initState() {
     super.initState();
-    _initializeVideoPlayer();
+    _initializeYouTubePlayer();
   }
 
-  Future<void> _initializeVideoPlayer() async {
+  void _initializeYouTubePlayer() {
     try {
-      debugPrint('Initializing video player with path: ${widget.videoPath}');
+      _controller = YoutubePlayerController.fromVideoId(
+        videoId: widget.videoId,
+        params: const YoutubePlayerParams(
+          showControls: true,
+          showFullscreenButton: true,
+          mute: false,
+          enableCaption: false,
+          showVideoAnnotations: false,
+        ),
+      );
       
-      _controller = VideoPlayerController.asset(widget.videoPath);
-      await _controller.initialize();
-      
-      // Set initial volume
-      await _controller.setVolume(_isMuted ? 0.0 : 1.0);
-      
-      // Add listener for state changes
-      _controller.addListener(_videoListener);
-      
-      setState(() {
-        _isInitialized = true;
-        _totalDuration = _controller.value.duration;
-        _currentPosition = _controller.value.position;
-      });
-      
-      debugPrint('Video player initialized successfully');
-      
-      // Start autoplay if enabled
-      if (widget.autoPlay) {
-        await _controller.play();
-        setState(() {
-          _isPlaying = true;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error initializing video player: $e');
-      setState(() {
-        _isInitialized = true;
-        _hasError = true;
-        _errorMessage = 'Video yüklenirken hata oluştu: ${e.toString()}';
-      });
-    }
-  }
-
-  void _videoListener() {
-    if (mounted) {
-      setState(() {
-        _isPlaying = _controller.value.isPlaying;
-        _currentPosition = _controller.value.position;
-        _totalDuration = _controller.value.duration;
-      });
-    }
-  }
-
-  void _togglePlayPause() {
-    debugPrint('Toggle play/pause called. Current state: $_isPlaying');
-    if (_isPlaying) {
-      _controller.pause();
-    } else {
-      _controller.play();
-    }
-  }
-
-  void _toggleMute() {
-    debugPrint('Toggle mute called. Current state: $_isMuted');
-    setState(() {
-      _isMuted = !_isMuted;
-    });
-    _controller.setVolume(_isMuted ? 0.0 : 1.0);
-  }
-
-  void _seekTo(Duration position) {
-    _controller.seekTo(position);
-  }
-
-  void _showControlsTemporarily() {
-    setState(() {
-      _showControls = true;
-    });
-    
-    _controlsTimer?.cancel();
-    _controlsTimer = Timer(const Duration(seconds: 3), () {
+      // Set initialization to true immediately since the controller is ready
       if (mounted) {
         setState(() {
-          _showControls = false;
+          _isInitialized = true;
         });
       }
-    });
-  }
-
-  void _toggleFullscreen() {
-    if (!_isInitialized || _hasError) return;
-    
-    final wasPlaying = _isPlaying;
-    final currentPosition = _currentPosition;
-    
-    debugPrint('Entering fullscreen. Was playing: $wasPlaying, Position: $currentPosition');
-    
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => _FullscreenVideoPlayer(
-          controller: _controller,
-          wasPlaying: wasPlaying,
-          onExit: (shouldResume) {
-            if (shouldResume && wasPlaying && !_controller.value.isPlaying) {
-              _controller.play();
-            }
-          },
-        ),
-      ),
-    );
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _errorMessage = 'Video başlatılırken hata oluştu: $error';
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
-    _controlsTimer?.cancel();
-    _controller.removeListener(_videoListener);
-    _controller.dispose();
+    _controller.close();
     super.dispose();
   }
 
@@ -171,31 +84,16 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
-            // Video player
+            // YouTube Player
             if (_isInitialized && !_hasError)
-              GestureDetector(
-                onTap: _showControlsTemporarily,
-                child: Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: AspectRatio(
-                    aspectRatio: _controller.value.aspectRatio,
-                    child: VideoPlayer(_controller),
-                  ),
-                ),
+              YoutubePlayer(
+                controller: _controller,
+                aspectRatio: 16 / 9,
               )
             else if (_hasError)
               _buildErrorWidget()
             else
               _buildLoadingWidget(),
-            
-            // Controls overlay
-            if (_isInitialized && !_hasError && _showControls)
-              _buildControlsOverlay(),
-            
-            // Always visible control buttons
-            if (_isInitialized && !_hasError)
-              _buildAlwaysVisibleControls(),
             
             // Video title overlay
             _buildVideoTitleOverlay(),
@@ -241,7 +139,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   _hasError = false;
                   _errorMessage = '';
                 });
-                _initializeVideoPlayer();
+                _initializeYouTubePlayer();
               },
               icon: const Icon(Icons.refresh, size: 16),
               label: const Text('Tekrar Dene'),
@@ -263,153 +161,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       decoration: BoxDecoration(color: AppColors.surfaceVariant),
       child: const Center(
         child: CircularProgressIndicator(color: AppColors.primary),
-      ),
-    );
-  }
-
-  Widget _buildControlsOverlay() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.black.withValues(alpha: 0.3),
-            Colors.transparent,
-            Colors.transparent,
-            Colors.black.withValues(alpha: 0.3),
-          ],
-        ),
-      ),
-      child: Column(
-        children: [
-          // Top controls
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                _buildControlButton(
-                  icon: Icons.fullscreen,
-                  onPressed: _toggleFullscreen,
-                ),
-              ],
-            ),
-          ),
-          
-          const Spacer(),
-          
-          // Bottom controls
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Progress bar
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: AppColors.primary,
-                    inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
-                    thumbColor: AppColors.primary,
-                    overlayColor: AppColors.primary.withValues(alpha: 0.2),
-                  ),
-                  child: Slider(
-                    value: _totalDuration.inMilliseconds > 0
-                        ? _currentPosition.inMilliseconds / _totalDuration.inMilliseconds
-                        : 0.0,
-                    onChanged: (value) {
-                      final newPosition = Duration(
-                        milliseconds: (value * _totalDuration.inMilliseconds).round(),
-                      );
-                      _seekTo(newPosition);
-                    },
-                  ),
-                ),
-                
-                // Control buttons
-                Row(
-                  children: [
-                    _buildControlButton(
-                      icon: _isPlaying ? Icons.pause : Icons.play_arrow,
-                      onPressed: _togglePlayPause,
-                      size: 48,
-                    ),
-                    const SizedBox(width: 16),
-                    _buildControlButton(
-                      icon: _isMuted ? Icons.volume_off : Icons.volume_up,
-                      onPressed: _toggleMute,
-                    ),
-                    const Spacer(),
-                    Text(
-                      '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')} / ${_totalDuration.inMinutes}:${(_totalDuration.inSeconds % 60).toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAlwaysVisibleControls() {
-    return Positioned(
-      top: 16,
-      right: 16,
-      child: Row(
-        children: [
-          _buildControlButton(
-            icon: Icons.fullscreen,
-            onPressed: _toggleFullscreen,
-          ),
-          const SizedBox(width: 8),
-          _buildControlButton(
-            icon: _isMuted ? Icons.volume_off : Icons.volume_up,
-            onPressed: _toggleMute,
-          ),
-          const SizedBox(width: 8),
-          _buildControlButton(
-            icon: _isPlaying ? Icons.pause : Icons.play_arrow,
-            onPressed: _togglePlayPause,
-            size: 48,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildControlButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-    double size = 40,
-  }) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.8),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowMedium,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(
-          icon,
-          color: AppColors.textPrimary,
-          size: size * 0.5,
-        ),
-        padding: EdgeInsets.zero,
       ),
     );
   }
@@ -446,236 +197,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                 ),
               ),
             ),
-            if (_isInitialized && !_hasError)
-              Text(
-                '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')} / ${_totalDuration.inMinutes}:${(_totalDuration.inSeconds % 60).toString().padLeft(2, '0')}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FullscreenVideoPlayer extends StatefulWidget {
-  final VideoPlayerController controller;
-  final bool wasPlaying;
-  final Function(bool) onExit;
-
-  const _FullscreenVideoPlayer({
-    required this.controller,
-    required this.wasPlaying,
-    required this.onExit,
-  });
-
-  @override
-  State<_FullscreenVideoPlayer> createState() => _FullscreenVideoPlayerState();
-}
-
-class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer> {
-  bool _isPlaying = false;
-  bool _isMuted = false;
-  Duration _currentPosition = Duration.zero;
-  Duration _totalDuration = Duration.zero;
-  bool _showControls = true;
-  Timer? _controlsTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _isPlaying = widget.controller.value.isPlaying;
-    _isMuted = widget.controller.value.volume == 0.0;
-    _currentPosition = widget.controller.value.position;
-    _totalDuration = widget.controller.value.duration;
-    
-    widget.controller.addListener(_videoListener);
-    _showControlsTemporarily();
-  }
-
-  void _videoListener() {
-    if (mounted) {
-      setState(() {
-        _isPlaying = widget.controller.value.isPlaying;
-        _currentPosition = widget.controller.value.position;
-        _totalDuration = widget.controller.value.duration;
-      });
-    }
-  }
-
-  void _showControlsTemporarily() {
-    setState(() {
-      _showControls = true;
-    });
-    
-    _controlsTimer?.cancel();
-    _controlsTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() {
-          _showControls = false;
-        });
-      }
-    });
-  }
-
-  void _togglePlayPause() {
-    if (_isPlaying) {
-      widget.controller.pause();
-    } else {
-      widget.controller.play();
-    }
-  }
-
-  void _toggleMute() {
-    setState(() {
-      _isMuted = !_isMuted;
-    });
-    widget.controller.setVolume(_isMuted ? 0.0 : 1.0);
-  }
-
-  void _seekTo(Duration position) {
-    widget.controller.seekTo(position);
-  }
-
-  @override
-  void dispose() {
-    _controlsTimer?.cancel();
-    widget.controller.removeListener(_videoListener);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: GestureDetector(
-          onTap: _showControlsTemporarily,
-          child: Stack(
-            children: [
-              // Fullscreen video
-              Center(
-                child: AspectRatio(
-                  aspectRatio: widget.controller.value.aspectRatio,
-                  child: VideoPlayer(widget.controller),
-                ),
-              ),
-              
-              // Controls overlay
-              if (_showControls)
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.3),
-                        Colors.transparent,
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.3),
-                      ],
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Top controls
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                widget.onExit(_isPlaying);
-                                Navigator.of(context).pop();
-                              },
-                              icon: const Icon(Icons.close, color: Colors.white, size: 24),
-                            ),
-                            Text(
-                              'Tanıtım Videosu',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 48), // Balance the layout
-                          ],
-                        ),
-                      ),
-                      
-                      const Spacer(),
-                      
-                      // Bottom controls
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            // Progress bar
-                            SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                activeTrackColor: AppColors.primary,
-                                inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
-                                thumbColor: AppColors.primary,
-                                overlayColor: AppColors.primary.withValues(alpha: 0.2),
-                              ),
-                              child: Slider(
-                                value: _totalDuration.inMilliseconds > 0
-                                    ? _currentPosition.inMilliseconds / _totalDuration.inMilliseconds
-                                    : 0.0,
-                                onChanged: (value) {
-                                  final newPosition = Duration(
-                                    milliseconds: (value * _totalDuration.inMilliseconds).round(),
-                                  );
-                                  _seekTo(newPosition);
-                                },
-                              ),
-                            ),
-                            
-                            // Control buttons
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  onPressed: _togglePlayPause,
-                                  icon: Icon(
-                                    _isPlaying ? Icons.pause : Icons.play_arrow,
-                                    color: Colors.white,
-                                    size: 32,
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                IconButton(
-                                  onPressed: _toggleMute,
-                                  icon: Icon(
-                                    _isMuted ? Icons.volume_off : Icons.volume_up,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                Text(
-                                  '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')} / ${_totalDuration.inMinutes}:${(_totalDuration.inSeconds % 60).toString().padLeft(2, '0')}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
         ),
       ),
     );

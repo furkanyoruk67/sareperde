@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import '../constants/app_colors.dart';
 import '../data/product_data.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../widgets/filter_panel.dart';
-import '../widgets/video_player_widget.dart';
+
 import '../widgets/video_showcase_section.dart';
+import '../widgets/sticky_video_player.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_modal.dart';
 // import 'cart_page.dart'; // Commented out as cart functionality is disabled
@@ -44,7 +46,8 @@ class _CatalogPageState extends State<CatalogPage> {
   Product? _selectedProduct;
   bool _isModalOpen = false;
   final TextEditingController _searchController = TextEditingController();
-  bool _isSearchFocused = false;
+  final ScrollController _scrollController = ScrollController();
+
   bool _hasActiveFilters = false;
 
   int get _activeFilterCount {
@@ -63,6 +66,12 @@ class _CatalogPageState extends State<CatalogPage> {
   void initState() {
     super.initState();
     _applySorting();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _applyFilters() {
@@ -355,21 +364,24 @@ class _CatalogPageState extends State<CatalogPage> {
                  child: Image.asset('assets/logo1.jpg', height: 50),
                ),
                const SizedBox(width: 16),
-               const Text(
-                 'SARE PERDE',
-                 style: TextStyle(
-                   fontSize: 32,
-                   fontWeight: FontWeight.w700,
-                   color: Colors.black,
-                   letterSpacing: 1.5,
-                   fontFamily: 'Life EF Regular SC',
-                   shadows: [
-                     Shadow(
-                       color: AppColors.shadowMedium,
-                       blurRadius: 4,
-                       offset: Offset(0, 2),
-                     ),
-                   ],
+               const Flexible(
+                 child: Text(
+                   'SARE PERDE',
+                   style: TextStyle(
+                     fontSize: 32,
+                     fontWeight: FontWeight.w700,
+                     color: Colors.black,
+                     letterSpacing: 1.5,
+                     fontFamily: 'Arial, sans-serif',
+                     shadows: [
+                       Shadow(
+                         color: AppColors.shadowMedium,
+                         blurRadius: 4,
+                         offset: Offset(0, 2),
+                       ),
+                     ],
+                   ),
+                   overflow: TextOverflow.ellipsis,
                  ),
                ),
              ],
@@ -444,11 +456,7 @@ class _CatalogPageState extends State<CatalogPage> {
                    }
                  });
                },
-               onTap: () {
-                 setState(() {
-                   _isSearchFocused = true;
-                 });
-               },
+               
              ),
            ),
            const SizedBox(width: 8),
@@ -585,19 +593,34 @@ class _CatalogPageState extends State<CatalogPage> {
         ],
       ),
              backgroundColor: AppColors.background,
-       body: GestureDetector(
-         onTap: () {
-           // Clear focus when clicking outside search bar
-           FocusScope.of(context).unfocus();
-           setState(() {
-             _isSearchFocused = false;
-           });
-         },
-         child: Stack(
-           children: [
-             CustomScrollView(
+               body: Stack(
+          children: [
+            // Main Content
+                        CustomScrollView(
+              controller: _scrollController,
            slivers: [
-             // Video and Product Showcase Section
+             // Video Section at the top
+             SliverToBoxAdapter(
+               child: Container(
+                 width: double.infinity,
+                 height: 300,
+                 child: YoutubePlayer(
+                   controller: YoutubePlayerController.fromVideoId(
+                     videoId: 'rOk0pK6KrCg',
+                     params: const YoutubePlayerParams(
+                       showControls: true,
+                       showFullscreenButton: true,
+                       mute: false,
+                       enableCaption: false,
+                       showVideoAnnotations: false,
+                     ),
+                   ),
+                   aspectRatio: 16 / 9,
+                 ),
+               ),
+             ),
+               
+               // Video and Product Showcase Section
              SliverToBoxAdapter(
                child: VideoShowcaseSection(),
              ),
@@ -999,57 +1022,65 @@ class _CatalogPageState extends State<CatalogPage> {
             },
             isFavorite: _selectedProduct != null ? _isFavorite(_selectedProduct!) : false,
           ),
+          
+          // Sticky Video Player - Positioned at the very end for highest z-index
+          StickyVideoPlayer(
+            videoId: 'rOk0pK6KrCg', // Replace with your actual video ID
+            initialHeight: 300,
+            stickyHeight: 180,
+            autoPlay: true,
+            scrollController: _scrollController,
+          ),
         ],
       ),
-      ),
       floatingActionButton: _isFilterPanelVisible 
-          ? null 
-          : null, // Consumer<CartProvider>(
-              // builder: (context, cartProvider, child) {
-              //   return FloatingActionButton.extended(
-              //     onPressed: () {
-              //       Navigator.push(
-              //         context,
-              //         MaterialPageRoute(builder: (context) => const CartPage()),
-              //       );
-              //     },
-              //     label: Text(
-              //       'Sepetim${cartProvider.itemCount > 0 ? ' (${cartProvider.itemCount})' : ''}',
-              //       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              //     ),
-              //     icon: Stack(
-              //       children: [
-              //         const Icon(Icons.shopping_cart, size: 20),
-              //         if (cartProvider.itemCount > 0)
-              //           Positioned(
-              //             right: 0,
-              //             top: 0,
-              //             child: Container(
-              //               padding: const EdgeInsets.all(4),
-              //               decoration: BoxDecoration(
-              //                 color: AppColors.error,
-              //                 borderRadius: BorderRadius.circular(10),
-              //               ),
-              //               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              //               child: Text(
-              //                 '${cartProvider.itemCount}',
-              //                 style: const TextStyle(
-              //                   color: AppColors.surface,
-              //                   fontSize: 10,
-              //                   fontWeight: FontWeight.bold,
-              //               ),
-              //               textAlign: TextAlign.center,
-              //             ),
-              //           ),
-              //       ],
-              //     ),
-              //     backgroundColor: AppColors.primary,
-              //     foregroundColor: AppColors.surface,
-              //     elevation: 8,
-              //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              //   );
-              // },
-              // ),
+        ? null 
+        : null, // Consumer<CartProvider>(
+            // builder: (context, cartProvider, child) {
+            //   return FloatingActionButton.extended(
+            //     onPressed: () {
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(builder: (context) => const CartPage()),
+            //       );
+            //     },
+            //     label: Text(
+            //       'Sepetim${cartProvider.itemCount > 0 ? ' (${cartProvider.itemCount})' : ''}',
+            //       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            //     ),
+            //     icon: Stack(
+            //       children: [
+            //         const Icon(Icons.shopping_cart, size: 20),
+            //         if (cartProvider.itemCount > 0)
+            //           Positioned(
+            //             right: 0,
+            //             top: 0,
+            //             child: Container(
+            //               padding: const EdgeInsets.all(4),
+            //               decoration: BoxDecoration(
+            //                 color: AppColors.error,
+            //                 borderRadius: BorderRadius.circular(10),
+            //               ),
+            //               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+            //               child: Text(
+            //                 '${cartProvider.itemCount}',
+            //                 style: const TextStyle(
+            //                   color: AppColors.surface,
+            //                   fontSize: 10,
+            //               fontWeight: FontWeight.bold,
+            //               ),
+            //               textAlign: TextAlign.center,
+            //             ),
+            //           ),
+            //       ],
+            //     ),
+            //     backgroundColor: AppColors.primary,
+            //     foregroundColor: AppColors.surface,
+            //     elevation: 8,
+            //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            //   );
+            // },
+            // ),
     );
   }
 } 
