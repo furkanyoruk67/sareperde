@@ -12,6 +12,7 @@ import '../widgets/filter_panel.dart';
 import '../widgets/footer.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_modal.dart';
+import '../widgets/best_sellers_carousel.dart';
 import 'favorites_page.dart';
 import '../widgets/dimension_dialog.dart';
 
@@ -199,7 +200,7 @@ class _AnimatedDropdownMenuState extends State<AnimatedDropdownMenu>
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: _isOpen || _isHovered ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+              color: _isOpen || _isHovered ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -242,6 +243,7 @@ class CatalogPage extends StatefulWidget {
 }
 
 class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin {
+  final Set<String> _selectedCategories = {};
   final Set<String> _selectedProductTypes = {};
   final Set<String> _selectedSizes = {};
   final Set<String> _selectedQualities = {};
@@ -258,6 +260,8 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
   final ScrollController _scrollController = ScrollController();
 
   bool _hasActiveFilters = false;
+  String _searchQuery = '';
+  bool _isSearching = false;
 
   Widget _buildAnimatedCategoryButton(String category, List<String> items) {
     return AnimatedDropdownMenu(
@@ -298,6 +302,22 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
 
   void _applyFilters() {
     _visibleProducts = ProductData.allProducts.where((product) {
+      // Arama filtresi
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final productName = product.name.toLowerCase();
+        final productType = product.productType.toLowerCase();
+        final productColor = product.color.toLowerCase();
+        final productBrand = product.brand.toLowerCase();
+        
+        if (!productName.contains(query) && 
+            !productType.contains(query) && 
+            !productColor.contains(query) && 
+            !productBrand.contains(query)) {
+          return false;
+        }
+      }
+      
       // Fiyat filtresi
       if (product.price < _priceRange.start || product.price > _priceRange.end) {
         return false;
@@ -356,6 +376,142 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
       _currentSortOption = option;
       _applyFilters();
     });
+  }
+
+  void _performSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+      _isSearching = query.isNotEmpty;
+      _applyFilters();
+    });
+  }
+
+  void _clearSearch() {
+    setState(() {
+      _searchQuery = '';
+      _isSearching = false;
+      _applyFilters();
+    });
+  }
+
+  int _getSearchResultsCount(String query) {
+    if (query.isEmpty) return ProductData.allProducts.length;
+    
+    return ProductData.allProducts.where((product) {
+      final queryLower = query.toLowerCase();
+      final productName = product.name.toLowerCase();
+      final productType = product.productType.toLowerCase();
+      final productColor = product.color.toLowerCase();
+      final productBrand = product.brand.toLowerCase();
+      
+      return productName.contains(queryLower) || 
+             productType.contains(queryLower) || 
+             productColor.contains(queryLower) || 
+             productBrand.contains(queryLower);
+    }).length;
+  }
+
+  void _showSearchDialog() {
+    String tempSearchQuery = _searchQuery;
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Row(
+          children: [
+            Icon(Icons.search, color: AppColors.primary),
+            const SizedBox(width: 8),
+            const Text('Ürün Ara'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Ürün adı, tip, renk veya marka ara...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
+                suffixIcon: tempSearchQuery.isNotEmpty
+                    ? IconButton(
+                        onPressed: () {
+                          tempSearchQuery = '';
+                          setDialogState(() {});
+                        },
+                        icon: Icon(Icons.clear, color: AppColors.textSecondary),
+                      )
+                    : null,
+              ),
+              onChanged: (value) {
+                tempSearchQuery = value;
+                setDialogState(() {});
+              },
+              onSubmitted: (value) {
+                Navigator.pop(context);
+                _performSearch(value);
+              },
+            ),
+            if (tempSearchQuery.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: AppColors.primary, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Arama sonuçları: ${_getSearchResultsCount(tempSearchQuery)} ürün bulundu',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'İptal',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _performSearch(tempSearchQuery);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Ara'),
+          ),
+        ],
+        ),
+      ),
+    );
   }
 
   void _openProductModal(Product product) {
@@ -509,12 +665,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                               ),
                               child: IconButton(
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Arama özelliği yakında kullanılabilir olacak!'),
-                                      duration: Duration(seconds: 2),
-                                    ),
-                                  );
+                                  _showSearchDialog();
                                 },
                                 icon: Icon(Icons.search, color: AppColors.textSecondary, size: 22),
                               ),
@@ -572,7 +723,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),
@@ -600,9 +751,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                           colors: [
-                                            Colors.black.withOpacity(0.3),
+                                            Colors.black.withValues(alpha: 0.3),
                                             Colors.transparent,
-                                            Colors.black.withOpacity(0.4),
+                                            Colors.black.withValues(alpha: 0.4),
                                           ],
                                         ),
                                       ),
@@ -621,7 +772,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                               color: Colors.white,
                                               shadows: [
                                                 Shadow(
-                                                  color: Colors.black.withOpacity(0.5),
+                                                  color: Colors.black.withValues(alpha: 0.5),
                                                   blurRadius: 4,
                                                   offset: const Offset(0, 2),
                                                 ),
@@ -637,7 +788,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                               color: Colors.white,
                                               shadows: [
                                                 Shadow(
-                                                  color: Colors.black.withOpacity(0.5),
+                                                  color: Colors.black.withValues(alpha: 0.5),
                                                   blurRadius: 2,
                                                   offset: const Offset(0, 1),
                                                 ),
@@ -683,75 +834,203 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                          width: double.infinity,
                          height: 300,
                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                         child: Stack(
-                           children: [
-                                                           // Video as background
-                              AbsorbPointer(
-                                absorbing: isFilterOpen, // filtre paneli açıkken tıklamaları engelle
-                                child: kIsWeb 
-                                  ? AspectRatio(
-                                      aspectRatio: 16 / 9,
-                                      child: YoutubePlayer(
-                                        controller: YoutubePlayerController.fromVideoId(
-                                          videoId: 'rOk0pK6KrCg',
-                                          params: const YoutubePlayerParams(
-                                            showControls: true,
-                                            showFullscreenButton: true,
-                                            mute: false,
-                                            enableCaption: false,
-                                            showVideoAnnotations: false,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : Container(
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surfaceVariant,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.play_circle_outline,
-                                              size: 48,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                            const SizedBox(height: 12),
-                                            Text(
-                                              'Video Player',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                                color: AppColors.textSecondary,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Web platformunda video izleyebilirsiniz',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: AppColors.textSecondary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                              ),
-                                                           // Filter Panel Overlay - En üstte
-                              if (_isFilterPanelVisible)
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    width: 280,
-                                    height: MediaQuery.of(context).size.height,
-                                    child: Material(
-                                      elevation: 999999,
-                                      color: Colors.transparent,
-                                      child: FilterPanel(
+                         child: LayoutBuilder(
+                           builder: (context, constraints) {
+                             final screenWidth = MediaQuery.of(context).size.width;
+                             final isMobile = screenWidth < 768;
+                             
+                             if (isMobile) {
+                               // Mobile layout: Stack vertically
+                               return Column(
+                                 children: [
+                                   // Video Section (Top)
+                                   Expanded(
+                                     flex: 2,
+                                     child: Container(
+                                       margin: const EdgeInsets.only(bottom: 8),
+                                       child: Stack(
+                                         children: [
+                                           // Video as background
+                                           AbsorbPointer(
+                                             absorbing: isFilterOpen,
+                                             child: kIsWeb 
+                                               ? AspectRatio(
+                                                   aspectRatio: 16 / 9,
+                                                   child: YoutubePlayer(
+                                                     controller: YoutubePlayerController.fromVideoId(
+                                                       videoId: 'rOk0pK6KrCg',
+                                                       params: const YoutubePlayerParams(
+                                                         showControls: true,
+                                                         showFullscreenButton: true,
+                                                         mute: false,
+                                                         enableCaption: false,
+                                                         showVideoAnnotations: false,
+                                                       ),
+                                                     ),
+                                                   ),
+                                                 )
+                                               : Container(
+                                                   decoration: BoxDecoration(
+                                                     color: AppColors.surfaceVariant,
+                                                     borderRadius: BorderRadius.circular(12),
+                                                   ),
+                                                   child: Center(
+                                                     child: Column(
+                                                       mainAxisAlignment: MainAxisAlignment.center,
+                                                       children: [
+                                                         Icon(
+                                                           Icons.play_circle_outline,
+                                                           size: 48,
+                                                           color: AppColors.textSecondary,
+                                                         ),
+                                                         const SizedBox(height: 12),
+                                                         Text(
+                                                           'Video Player',
+                                                           style: TextStyle(
+                                                             fontSize: 16,
+                                                             fontWeight: FontWeight.w600,
+                                                             color: AppColors.textSecondary,
+                                                           ),
+                                                         ),
+                                                         const SizedBox(height: 4),
+                                                         Text(
+                                                           'Web platformunda video izleyebilirsiniz',
+                                                           style: TextStyle(
+                                                             fontSize: 12,
+                                                             color: AppColors.textSecondary,
+                                                           ),
+                                                         ),
+                                                       ],
+                                                     ),
+                                                   ),
+                                                 ),
+                                           ),
+                                         ],
+                                       ),
+                                     ),
+                                   ),
+                                   
+                                   // Best Sellers Section (Bottom)
+                                   Expanded(
+                                     flex: 1,
+                                     child: Container(
+                                       margin: const EdgeInsets.only(top: 8),
+                                       child: BestSellersCarousel(
+                                         height: 120,
+                                         width: double.infinity,
+                                       ),
+                                     ),
+                                   ),
+                                 ],
+                               );
+                             } else {
+                               // Desktop layout: Side by side
+                               return Row(
+                                 children: [
+                                   // Video Section (Left side)
+                                   Expanded(
+                                     flex: 5,
+                                     child: Container(
+                                       margin: const EdgeInsets.only(right: 2),
+                                       child: Stack(
+                                         children: [
+                                           // Video as background
+                                           AbsorbPointer(
+                                             absorbing: isFilterOpen,
+                                             child: kIsWeb 
+                                               ? AspectRatio(
+                                                   aspectRatio: 16 / 9,
+                                                   child: YoutubePlayer(
+                                                     controller: YoutubePlayerController.fromVideoId(
+                                                       videoId: 'rOk0pK6KrCg',
+                                                       params: const YoutubePlayerParams(
+                                                         showControls: true,
+                                                         showFullscreenButton: true,
+                                                         mute: false,
+                                                         enableCaption: false,
+                                                         showVideoAnnotations: false,
+                                                       ),
+                                                     ),
+                                                   ),
+                                                 )
+                                               : Container(
+                                                   decoration: BoxDecoration(
+                                                     color: AppColors.surfaceVariant,
+                                                     borderRadius: BorderRadius.circular(12),
+                                                   ),
+                                                   child: Center(
+                                                     child: Column(
+                                                       mainAxisAlignment: MainAxisAlignment.center,
+                                                       children: [
+                                                         Icon(
+                                                           Icons.play_circle_outline,
+                                                           size: 48,
+                                                           color: AppColors.textSecondary,
+                                                         ),
+                                                         const SizedBox(height: 12),
+                                                         Text(
+                                                           'Video Player',
+                                                           style: TextStyle(
+                                                             fontSize: 16,
+                                                             fontWeight: FontWeight.w600,
+                                                             color: AppColors.textSecondary,
+                                                           ),
+                                                         ),
+                                                         const SizedBox(height: 4),
+                                                         Text(
+                                                           'Web platformunda video izleyebilirsiniz',
+                                                           style: TextStyle(
+                                                             fontSize: 12,
+                                                             color: AppColors.textSecondary,
+                                                           ),
+                                                         ),
+                                                       ],
+                                                     ),
+                                                   ),
+                                                 ),
+                                           ),
+                                         ],
+                                       ),
+                                     ),
+                                   ),
+                                   
+                                   // Best Sellers Section (Right side)
+                                   Expanded(
+                                     flex: 3,
+                                     child: Container(
+                                       margin: const EdgeInsets.only(left: 2),
+                                       child: BestSellersCarousel(
+                                         height: 300,
+                                         width: double.infinity,
+                                       ),
+                                     ),
+                                   ),
+                                 ],
+                               );
+                             }
+                           },
+                         ),
+                       ),
+                     ),
+                     
+                                          // Filter Panel Overlay - Positioned absolutely over the entire section
+                     if (_isFilterPanelVisible)
+                       SliverToBoxAdapter(
+                         child: Container(
+                           width: double.infinity,
+                           height: 0,
+                           child: Stack(
+                             children: [
+                               Positioned(
+                                 right: 16,
+                                 top: 0,
+                                 child: Container(
+                                   width: 280,
+                                   height: MediaQuery.of(context).size.height,
+                                   child: Material(
+                                     elevation: 999999,
+                                     color: Colors.transparent,
+                                     child: FilterPanel(
                                        selectedProductTypes: _selectedProductTypes,
                                        selectedSizes: _selectedSizes,
                                        selectedQualities: _selectedQualities,
@@ -820,9 +1099,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                            _hasActiveFilters = _activeFilterCount > 0;
                                          });
                                        },
-                                                                               onClose: () {
-                                          _closeFilter();
-                                        },
+                                       onClose: () {
+                                         _closeFilter();
+                                       },
                                        onResetFilters: () {
                                          setState(() {
                                            _selectedProductTypes.clear();
@@ -839,10 +1118,10 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                    ),
                                  ),
                                ),
-                           ],
+                             ],
+                           ),
                          ),
                        ),
-                     ),
                     
                     // Products Section
                     SliverToBoxAdapter(
@@ -856,7 +1135,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  _hasActiveFilters ? 'Katalog' : 'Anasayfa',
+                                  _isSearching ? 'Arama Sonuçları' : (_hasActiveFilters ? 'Katalog' : 'Anasayfa'),
                                   style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
@@ -865,7 +1144,32 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                if (_hasActiveFilters)
+                                if (_isSearching) ...[
+                                  Row(
+                                    children: [
+                                      Icon(Icons.search, color: AppColors.primary, size: 16),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '"$_searchQuery" için ${_visibleProducts.length} sonuç bulundu',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      TextButton(
+                                        onPressed: _clearSearch,
+                                        child: Text(
+                                          'Temizle',
+                                          style: TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ] else if (_hasActiveFilters)
                                   Text(
                                     '${_visibleProducts.length} ürün bulundu',
                                     style: const TextStyle(
