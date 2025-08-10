@@ -79,14 +79,14 @@ class ProductCard extends StatelessWidget {
                          ),
                        ),
                        const SizedBox(height: 3),
-                       Text(
-                         '${product.price.toStringAsFixed(0)} ₺',
-                         style: const TextStyle(
-                           fontWeight: FontWeight.bold,
-                           fontSize: 12,
-                           color: AppColors.primary,
-                         ),
-                       ),
+                       // Text(
+                       //   '${product.price.toStringAsFixed(0)} ₺',
+                       //   style: const TextStyle(
+                       //     fontWeight: FontWeight.bold,
+                       //     fontSize: 12,
+                       //     color: AppColors.primary,
+                       //   ),
+                       // ),
                        const SizedBox(height: 4),
                       // Add to Favorites button
                       SizedBox(

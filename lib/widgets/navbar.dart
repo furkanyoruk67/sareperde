@@ -114,38 +114,6 @@ class _NavbarState extends State<Navbar> {
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
-              const SizedBox(width: 12),
-              Container(
-                margin: const EdgeInsets.only(right: 20),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: InkWell(
-                  onTap: () {
-                    // Contact info will be handled by parent
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Text(
-                      'İletişim',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.surface,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ],

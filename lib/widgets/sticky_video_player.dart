@@ -8,6 +8,7 @@ class StickyVideoPlayer extends StatefulWidget {
   final double stickyHeight;
   final double stickyWidth;
   final ScrollController? scrollController;
+  final double stickyStartOffset;
 
   const StickyVideoPlayer({
     super.key,
@@ -17,6 +18,7 @@ class StickyVideoPlayer extends StatefulWidget {
     this.stickyHeight = 150,
     this.stickyWidth = 250,
     this.scrollController,
+    this.stickyStartOffset = 0,
   });
 
   @override
@@ -94,7 +96,7 @@ class _StickyVideoPlayerState extends State<StickyVideoPlayer>
     if (widget.scrollController != null) {
       widget.scrollController!.addListener(() {
         final scrollOffset = widget.scrollController!.offset;
-        final shouldBeSticky = scrollOffset > widget.initialHeight * 0.5;
+        final shouldBeSticky = scrollOffset > widget.stickyStartOffset;
 
         if (shouldBeSticky != _isSticky) {
           setState(() => _isSticky = shouldBeSticky);

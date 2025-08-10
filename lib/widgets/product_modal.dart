@@ -216,14 +216,14 @@ class ProductModal extends StatelessWidget {
           const SizedBox(height: 8),
 
           // Price
-          Text(
-            '${selectedProduct!.price.toStringAsFixed(0)} ₺',
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue,
-            ),
-          ),
+          // Text(
+          //   '${selectedProduct!.price.toStringAsFixed(0)} ₺',
+          //   style: const TextStyle(
+          //     fontSize: 28,
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.blue,
+          //   ),
+          // ),
           const SizedBox(height: 24),
 
           // Scrollable product specifications

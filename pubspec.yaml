@@ -45,6 +45,9 @@ dependencies:
   video_player: ^2.8.3
   youtube_player_iframe: ^5.2.2
   
+  # Google Fonts for custom typography
+  google_fonts: ^6.1.0
+  
   # YouTube player for web - removed due to compatibility issues
 
 dev_dependencies:
