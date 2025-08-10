@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'dart:math';
 import '../constants/app_colors.dart';
 import '../data/product_data.dart';
 import '../models/product.dart';
 import '../providers/favorites_provider.dart';
-import 'product_card.dart';
 
 class BestSellersCarousel extends StatefulWidget {
   final double height;
@@ -24,26 +24,45 @@ class BestSellersCarousel extends StatefulWidget {
 class _BestSellersCarouselState extends State<BestSellersCarousel> {
   late List<Product> _bestSellingProducts;
   final ScrollController _scrollController = ScrollController();
-  int _currentIndex = 0;
-  int get _itemsPerView {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    return isMobile ? 1 : 2; // Number of items visible at once
-  }
-  static const int _autoScrollInterval = 4; // seconds
-  static const int _autoScrollItems = 1; // items to scroll
+  double _currentScrollPosition = 0;
+  static const int _autoScrollInterval = 3; // seconds
+  static const double _scrollStep = 1.0; // smooth scroll step
   
   Timer? _autoScrollTimer;
   bool _isHovering = false;
-  bool _showLeftArrow = false;
-  bool _showRightArrow = true;
+  bool _isUserScrolling = false;
+  late List<Product> _byHalitProducts;
 
   @override
   void initState() {
     super.initState();
-    // Get best selling products (first 8 products for showcase)
-    _bestSellingProducts = ProductData.allProducts.take(8).toList();
+    // Get ByHalit products and select 10 randomly
+    _byHalitProducts = ProductData.allProducts
+        .where((product) => product.brand == 'By Halit')
+        .toList();
+    
+    _bestSellingProducts = _getRandomProducts(_byHalitProducts, 10);
+    // Duplicate the list for infinite scroll effect
+    _bestSellingProducts = [..._bestSellingProducts, ..._bestSellingProducts];
+    
     _startAutoScroll();
+    _scrollController.addListener(_onScroll);
+  }
+  
+  List<Product> _getRandomProducts(List<Product> sourceList, int count) {
+    if (sourceList.length <= count) return List<Product>.from(sourceList);
+    
+    final random = Random();
+    final shuffled = List<Product>.from(sourceList)..shuffle(random);
+    return shuffled.take(count).toList().cast<Product>();
+  }
+  
+  void _onScroll() {
+    if (_scrollController.hasClients) {
+      setState(() {
+        _currentScrollPosition = _scrollController.offset;
+      });
+    }
   }
 
   @override
@@ -56,9 +75,9 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
   void _startAutoScroll() {
     _autoScrollTimer?.cancel();
     _autoScrollTimer = Timer.periodic(
-      const Duration(seconds: _autoScrollInterval),
+      const Duration(milliseconds: 50), // Smooth continuous scroll
       (timer) {
-        if (!_isHovering && mounted) {
+        if (!_isHovering && !_isUserScrolling && mounted && _scrollController.hasClients) {
           _autoScrollToNext();
         }
       },
@@ -66,51 +85,63 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
   }
 
   void _autoScrollToNext() {
-    if (_currentIndex >= _bestSellingProducts.length - _itemsPerView) {
-      // Loop back to the beginning
-      _currentIndex = 0;
+    final maxScrollExtent = _scrollController.position.maxScrollExtent;
+    final currentPosition = _scrollController.offset;
+    
+    if (currentPosition >= maxScrollExtent / 2) {
+      // Reset to beginning for infinite loop effect
+      _scrollController.jumpTo(0);
     } else {
-      _currentIndex = (_currentIndex + _autoScrollItems).clamp(0, _bestSellingProducts.length - _itemsPerView);
+      // Smooth auto-scroll
+      _scrollController.animateTo(
+        currentPosition + _scrollStep,
+        duration: const Duration(milliseconds: 50),
+        curve: Curves.linear,
+      );
     }
-    
-    _scrollToIndex(_currentIndex);
-    _updateArrowVisibility();
-  }
-
-  void _scrollToIndex(int index) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final itemWidth = isMobile ? 148.0 : 172.0; // Width of each item (including margin)
-    final scrollPosition = index * itemWidth;
-    
-    _scrollController.animateTo(
-      scrollPosition,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
   }
 
   void _scrollToPrevious() {
-    if (_currentIndex > 0) {
-      _currentIndex = (_currentIndex - _itemsPerView).clamp(0, _bestSellingProducts.length - _itemsPerView);
-      _scrollToIndex(_currentIndex);
-      _updateArrowVisibility();
+    if (_scrollController.hasClients) {
+      final itemWidth = _getItemWidth();
+      final newPosition = (_currentScrollPosition - itemWidth * 2).clamp(0.0, _scrollController.position.maxScrollExtent);
+      
+      setState(() => _isUserScrolling = true);
+      _scrollController.animateTo(
+        newPosition,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      ).then((_) {
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (mounted) setState(() => _isUserScrolling = false);
+        });
+      });
     }
   }
 
   void _scrollToNext() {
-    if (_currentIndex < _bestSellingProducts.length - _itemsPerView) {
-      _currentIndex = (_currentIndex + _itemsPerView).clamp(0, _bestSellingProducts.length - _itemsPerView);
-      _scrollToIndex(_currentIndex);
-      _updateArrowVisibility();
+    if (_scrollController.hasClients) {
+      final itemWidth = _getItemWidth();
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      final newPosition = (_currentScrollPosition + itemWidth * 2).clamp(0.0, maxScrollExtent);
+      
+      setState(() => _isUserScrolling = true);
+      _scrollController.animateTo(
+        newPosition,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      ).then((_) {
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (mounted) setState(() => _isUserScrolling = false);
+        });
+      });
     }
   }
 
-  void _updateArrowVisibility() {
-    setState(() {
-      _showLeftArrow = _currentIndex > 0;
-      _showRightArrow = _currentIndex < _bestSellingProducts.length - _itemsPerView;
-    });
+  double _getItemWidth() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    return isMobile ? 148.0 : 172.0;
   }
 
   void _onHoverEnter() {
@@ -167,7 +198,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'En Çok Satan Ürünler',
+                    'En Çok Satanlar - By Halit Collection',
                     style: TextStyle(
                       fontSize: isMobile ? 14 : 16,
                       fontWeight: FontWeight.w700,
@@ -175,10 +206,20 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColors.textSecondary,
-                  size: isMobile ? 12 : 14,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '10 Ürün',
+                    style: TextStyle(
+                      fontSize: isMobile ? 10 : 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -191,79 +232,191 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
               onExit: (_) => _onHoverExit(),
               child: Stack(
                 children: [
-                  ListView.builder(
-                    controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
-                                         padding: EdgeInsets.only(
-                       left: isMobile ? 0 : 1,
-                       right: isMobile ? 8 : 12,
-                     ),
-                    itemCount: _bestSellingProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = _bestSellingProducts[index];
-                      return Consumer<FavoritesProvider>(
-                        builder: (context, favoritesProvider, child) {
-                          return Container(
-                            width: isMobile ? 140 : 160,
-                            margin: EdgeInsets.only(right: isMobile ? 8 : 12),
-                            child: ProductCard(
-                              product: product,
-                              isHovered: false,
-                              isFavorite: favoritesProvider.isFavorite(product),
-                              onHoverEnter: () {},
-                              onHoverExit: () {},
-                              onToggleFavorite: () {
-                                favoritesProvider.toggleFavorite(product);
-                                final isFavorite = favoritesProvider.isFavorite(product);
-                                
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      isFavorite 
-                                        ? '${product.name} favorilere eklendi' 
-                                        : '${product.name} favorilerden çıkarıldı',
-                                    ),
-                                    duration: const Duration(seconds: 2),
-                                    backgroundColor: isFavorite ? AppColors.primary : AppColors.textSecondary,
-                                  ),
-                                );
-                              },
-                              onAddToCart: () {},
-                              onInspect: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('${product.name} seçildi'),
-                                    duration: const Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      );
+                  GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() => _isUserScrolling = true);
+                      Future.delayed(const Duration(milliseconds: 1000), () {
+                        if (mounted) setState(() => _isUserScrolling = false);
+                      });
                     },
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.only(
+                        left: isMobile ? 0 : 1,
+                        right: isMobile ? 8 : 12,
+                      ),
+                      itemCount: _bestSellingProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = _bestSellingProducts[index];
+                        return Consumer<FavoritesProvider>(
+                          builder: (context, favoritesProvider, child) {
+                            return Container(
+                              width: isMobile ? 140 : 160,
+                              margin: EdgeInsets.only(right: isMobile ? 8 : 12),
+                              child: Card(
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Product Image
+                                    Expanded(
+                                      flex: 3,
+                                      child: ClipRRect(
+                                        borderRadius: const BorderRadius.vertical(
+                                          top: Radius.circular(12),
+                                        ),
+                                        child: Container(
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                AppColors.surfaceVariant,
+                                                AppColors.surface,
+                                              ],
+                                            ),
+                                          ),
+                                          child: Image.asset(
+                                            product.image,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Container(
+                                                color: AppColors.surfaceVariant,
+                                                child: Icon(
+                                                  Icons.image_not_supported,
+                                                  color: AppColors.textSecondary,
+                                                  size: 40,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    
+                                    // Product Info - Fixed height to prevent overflow
+                                    Container(
+                                      height: isMobile ? 70 : 80,
+                                      padding: const EdgeInsets.all(6),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // Product Name
+                                          Text(
+                                            product.name,
+                                            style: TextStyle(
+                                              fontSize: isMobile ? 10 : 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
+                                              height: 1.1,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          
+                                          // Price
+                                          Text(
+                                            '${product.price.toStringAsFixed(0)} ₺',
+                                            style: TextStyle(
+                                              fontSize: isMobile ? 11 : 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          
+                                          // Favorilere Ekle Button
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                favoritesProvider.toggleFavorite(product);
+                                                final isFavorite = favoritesProvider.isFavorite(product);
+                                                
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      isFavorite 
+                                                        ? '${product.name} favorilere eklendi' 
+                                                        : '${product.name} favorilerden çıkarıldı',
+                                                    ),
+                                                    duration: const Duration(seconds: 2),
+                                                    backgroundColor: isFavorite ? AppColors.primary : AppColors.textSecondary,
+                                                  ),
+                                                );
+                                              },
+                                              icon: Icon(
+                                                favoritesProvider.isFavorite(product)
+                                                    ? Icons.favorite
+                                                    : Icons.favorite_border,
+                                                size: isMobile ? 12 : 14,
+                                              ),
+                                              label: Text(
+                                                favoritesProvider.isFavorite(product)
+                                                    ? 'Favorilerden Çıkar'
+                                                    : 'Favorilere Ekle',
+                                              ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: favoritesProvider.isFavorite(product)
+                                                    ? AppColors.error.withValues(alpha: 0.1)
+                                                    : AppColors.primary.withValues(alpha: 0.1),
+                                                foregroundColor: favoritesProvider.isFavorite(product)
+                                                    ? AppColors.error
+                                                    : AppColors.primary,
+                                                elevation: 0,
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: isMobile ? 4 : 6,
+                                                  vertical: isMobile ? 2 : 4,
+                                                ),
+                                                textStyle: TextStyle(
+                                                  fontSize: isMobile ? 8 : 9,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                   
-                  // Navigation arrows
-                  if (_showLeftArrow)
-                    Positioned(
-                      left: 8,
-                      top: 0,
-                      bottom: 0,
-                      child: Center(
-                        child: _buildNavigationArrow(Icons.chevron_left, _scrollToPrevious),
-                      ),
+                  // Navigation arrows - Always visible
+                  Positioned(
+                    left: 8,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: _buildNavigationArrow(Icons.chevron_left, _scrollToPrevious),
                     ),
+                  ),
                   
-                  if (_showRightArrow)
-                    Positioned(
-                      right: 8,
-                      top: 0,
-                      bottom: 0,
-                      child: Center(
-                        child: _buildNavigationArrow(Icons.chevron_right, _scrollToNext),
-                      ),
+                  Positioned(
+                    right: 8,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: _buildNavigationArrow(Icons.chevron_right, _scrollToNext),
                     ),
+                  ),
                 ],
               ),
             ),

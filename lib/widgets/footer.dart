@@ -137,7 +137,7 @@ class Footer extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildContactItem(
-                        icon: Icons.chat,
+                        icon: Icons.chat_bubble,
                         title: 'WhatsApp',
                         subtitle: '+90 536 495 02 62',
                         owner: 'Gülden ÖZDEMİR',

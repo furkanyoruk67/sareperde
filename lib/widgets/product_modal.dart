@@ -200,45 +200,79 @@ class ProductModal extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product name
-          Text(
-            selectedProduct!.name,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-            ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 8),
-
-          // Price
-          // Text(
-          //   '${selectedProduct!.price.toStringAsFixed(0)} ₺',
-          //   style: const TextStyle(
-          //     fontSize: 28,
-          //     fontWeight: FontWeight.bold,
-          //     color: Colors.blue,
-          //   ),
-          // ),
-          const SizedBox(height: 24),
-
-          // Scrollable product specifications
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product specifications
-                  _buildSpecificationRow('Kategori', selectedProduct!.category),
-                  _buildSpecificationRow('Ürün Tipi', selectedProduct!.productType),
-                  _buildSpecificationRow('Ebat', selectedProduct!.size),
-                  _buildSpecificationRow('Kalite', selectedProduct!.quality),
-                  _buildSpecificationRow('Renk', selectedProduct!.color),
-                  _buildSpecificationRow('Marka', selectedProduct!.brand),
-                  const SizedBox(height: 24),
-                ],
+          // Product name with better styling
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue[50]!, Colors.white],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue[100]!),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  selectedProduct!.name,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey[800],
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${selectedProduct!.price.toStringAsFixed(0)} ₺',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Product specifications section
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Section title
+                Text(
+                  'Ürün Özellikleri',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                // Scrollable specifications
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSpecificationRow('Kategori', selectedProduct!.category),
+                        _buildSpecificationRow('Ürün Tipi', selectedProduct!.productType),
+                        _buildSpecificationRow('Ebat', selectedProduct!.size),
+                        _buildSpecificationRow('Kalite', selectedProduct!.quality),
+                        _buildSpecificationRow('Renk', selectedProduct!.color),
+                        _buildSpecificationRow('Marka', selectedProduct!.brand),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -292,17 +326,18 @@ class ProductModal extends StatelessWidget {
 
   Widget _buildSpecificationRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: 120,
             child: Text(
               '$label:',
               style: TextStyle(
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                color: Colors.grey[600],
               ),
             ),
           ),
@@ -310,6 +345,8 @@ class ProductModal extends StatelessWidget {
             child: Text(
               value,
               style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
                 color: Colors.grey[800],
               ),
             ),

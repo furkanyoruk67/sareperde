@@ -858,7 +858,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                                    aspectRatio: 16 / 9,
                                                    child: YoutubePlayer(
                                                      controller: YoutubePlayerController.fromVideoId(
-                                                       videoId: 'rOk0pK6KrCg',
+                                                       videoId: 'YEkPpy_hGQM',
                                                        params: const YoutubePlayerParams(
                                                          showControls: true,
                                                          showFullscreenButton: true,
@@ -916,7 +916,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                      child: Container(
                                        margin: const EdgeInsets.only(top: 8),
                                        child: BestSellersCarousel(
-                                         height: 120,
+                                         height: 180,
                                          width: double.infinity,
                                        ),
                                      ),
@@ -942,7 +942,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                                    aspectRatio: 16 / 9,
                                                    child: YoutubePlayer(
                                                      controller: YoutubePlayerController.fromVideoId(
-                                                       videoId: 'rOk0pK6KrCg',
+                                                       videoId: 'YEkPpy_hGQM',
                                                        params: const YoutubePlayerParams(
                                                          showControls: true,
                                                          showFullscreenButton: true,
@@ -994,160 +994,17 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                      ),
                                    ),
                                    
-                                                                       // En Çok Satanlar Section (Right side) - Video ile aynı satırda
+                                                                       // Best Sellers Carousel Section (Right side) - Video ile aynı satırda
                                     Expanded(
                                       flex: 2,
-                                     child: Container(
-                                       height: 300,
-                                       decoration: BoxDecoration(
-                                         color: AppColors.surface,
-                                         borderRadius: BorderRadius.circular(12),
-                                         border: Border.all(color: AppColors.border, width: 1),
-                                       ),
-                                       child: Column(
-                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                         children: [
-                                                                                       // Başlık
-                                            Padding(
-                                              padding: const EdgeInsets.all(12),
-                                              child: Text(
-                                                'En Çok Satanlar',
-                                                style: GoogleFonts.playfairDisplay(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.textPrimary,
-                                                  fontStyle: FontStyle.italic,
-                                                ),
-                                              ),
-                                            ),
-                                           // Ürün listesi
-                                           Expanded(
-                                             child: ListView.builder(
-                                               scrollDirection: Axis.horizontal,
-                                               padding: const EdgeInsets.symmetric(horizontal: 8),
-                                               itemCount: ProductData.allProducts.take(3).length,
-                                               itemBuilder: (context, index) {
-                                                 final product = ProductData.allProducts[index];
-                                                                                                                                                     return GestureDetector(
-                                                    onTap: () => _openProductModal(product),
-                                                    child: Container(
-                                                      width: 160,
-                                                      margin: const EdgeInsets.symmetric(horizontal: 6),
-                                                      child: Card(
-                                                        elevation: 4,
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(12),
-                                                        ),
-                                                        child: Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            // Ürün resmi
-                                                            ClipRRect(
-                                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                                                              child: Container(
-                                                                height: 120,
-                                                                width: double.infinity,
-                                                                decoration: BoxDecoration(
-                                                                  gradient: LinearGradient(
-                                                                    begin: Alignment.topCenter,
-                                                                    end: Alignment.bottomCenter,
-                                                                    colors: [
-                                                                      AppColors.surfaceVariant,
-                                                                      AppColors.surface,
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                child: Image.asset(
-                                                                  product.image,
-                                                                  height: 120,
-                                                                  width: double.infinity,
-                                                                  fit: BoxFit.cover,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                                                                                         // Ürün bilgileri
-                                                             Padding(
-                                                               padding: const EdgeInsets.all(12),
-                                                               child: Column(
-                                                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                                                 children: [
-                                                                   Text(
-                                                                     product.name,
-                                                                     style: TextStyle(
-                                                                       fontSize: 13,
-                                                                       fontWeight: FontWeight.w600,
-                                                                       color: AppColors.textPrimary,
-                                                                       height: 1.2,
-                                                                     ),
-                                                                     maxLines: 2,
-                                                                     overflow: TextOverflow.ellipsis,
-                                                                   ),
-                                                                   const SizedBox(height: 8),
-                                                                   Container(
-                                                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                                     decoration: BoxDecoration(
-                                                                       color: AppColors.primary.withValues(alpha: 0.1),
-                                                                       borderRadius: BorderRadius.circular(8),
-                                                                     ),
-                                                                     child: Text(
-                                                                       'Popüler',
-                                                                       style: TextStyle(
-                                                                         fontSize: 10,
-                                                                         fontWeight: FontWeight.w600,
-                                                                         color: AppColors.primary,
-                                                                       ),
-                                                                     ),
-                                                                   ),
-                                                                 ],
-                                                               ),
-                                                             ),
-                                                             // Favorilere Ekle butonu - En altta
-                                                             Padding(
-                                                               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                                                               child: Consumer<FavoritesProvider>(
-                                                                 builder: (context, favoritesProvider, child) {
-                                                                   return SizedBox(
-                                                                     width: double.infinity,
-                                                                     child: TextButton(
-                                                                       onPressed: () => _toggleFavorite(product),
-                                                                       style: TextButton.styleFrom(
-                                                                         padding: const EdgeInsets.symmetric(vertical: 8),
-                                                                         backgroundColor: favoritesProvider.isFavorite(product)
-                                                                             ? AppColors.error.withValues(alpha: 0.1)
-                                                                             : AppColors.primary.withValues(alpha: 0.1),
-                                                                         shape: RoundedRectangleBorder(
-                                                                           borderRadius: BorderRadius.circular(8),
-                                                                         ),
-                                                                       ),
-                                                                       child: Text(
-                                                                         favoritesProvider.isFavorite(product)
-                                                                             ? 'Favorilerden Çıkar'
-                                                                             : 'Favorilere Ekle',
-                                                                         style: TextStyle(
-                                                                           fontSize: 11,
-                                                                           fontWeight: FontWeight.w600,
-                                                                           color: favoritesProvider.isFavorite(product)
-                                                                               ? AppColors.error
-                                                                               : AppColors.primary,
-                                                                         ),
-                                                                       ),
-                                                                     ),
-                                                                   );
-                                                                 },
-                                                               ),
-                                                             ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-                                               },
-                                             ),
-                                           ),
-                                         ],
-                                       ),
-                                     ),
-                                   ),
+                                      child: Container(
+                                        margin: const EdgeInsets.only(left: 8),
+                                        child: BestSellersCarousel(
+                                          height: 300,
+                                          width: double.infinity,
+                                        ),
+                                      ),
+                                    ),
                                  ],
                                );
                              }
@@ -1156,115 +1013,6 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                        ),
                      ),
                      
-                                          // Filter Panel Overlay - Positioned absolutely over the entire section
-                     if (_isFilterPanelVisible)
-                       SliverToBoxAdapter(
-                         child: Container(
-                           width: double.infinity,
-                           height: 0,
-                           child: Stack(
-                             children: [
-                               Positioned(
-                                 right: 16,
-                                 top: 0,
-                                 child: Container(
-                                   width: 280,
-                                   height: MediaQuery.of(context).size.height,
-                                   child: Material(
-                                     elevation: 999999,
-                                     color: Colors.transparent,
-                                     child: FilterPanel(
-                                       selectedProductTypes: _selectedProductTypes,
-                                       selectedSizes: _selectedSizes,
-                                       selectedQualities: _selectedQualities,
-                                       selectedColors: _selectedColors,
-                                       selectedBrands: _selectedBrands,
-                                       priceRange: _priceRange,
-                                       onPriceRangeChanged: (range) {
-                                         setState(() {
-                                           _priceRange = range;
-                                           _applyFilters();
-                                         });
-                                       },
-                                       onProductTypeChanged: (type, isSelected) {
-                                         setState(() {
-                                           if (isSelected) {
-                                             _selectedProductTypes.add(type);
-                                           } else {
-                                             _selectedProductTypes.remove(type);
-                                           }
-                                           _applyFilters();
-                                         });
-                                       },
-                                       onSizeChanged: (size, isSelected) {
-                                         setState(() {
-                                           if (isSelected) {
-                                             _selectedSizes.add(size);
-                                           } else {
-                                             _selectedSizes.remove(size);
-                                           }
-                                           _applyFilters();
-                                         });
-                                       },
-                                       onQualityChanged: (quality, isSelected) {
-                                         setState(() {
-                                           if (isSelected) {
-                                             _selectedQualities.add(quality);
-                                           } else {
-                                             _selectedQualities.remove(quality);
-                                           }
-                                           _applyFilters();
-                                         });
-                                       },
-                                       onColorChanged: (color, isSelected) {
-                                         setState(() {
-                                           if (isSelected) {
-                                             _selectedColors.add(color);
-                                           } else {
-                                             _selectedColors.remove(color);
-                                           }
-                                           _applyFilters();
-                                         });
-                                       },
-                                       onBrandChanged: (brand, isSelected) {
-                                         setState(() {
-                                           if (isSelected) {
-                                             _selectedBrands.add(brand);
-                                           } else {
-                                             _selectedBrands.remove(brand);
-                                           }
-                                           _applyFilters();
-                                         });
-                                       },
-                                       onApplyFilters: () {
-                                         setState(() {
-                                           _applyFilters();
-                                           _hasActiveFilters = _activeFilterCount > 0;
-                                         });
-                                       },
-                                       onClose: () {
-                                         _closeFilter();
-                                       },
-                                       onResetFilters: () {
-                                         setState(() {
-                                           _selectedProductTypes.clear();
-                                           _selectedSizes.clear();
-                                           _selectedQualities.clear();
-                                           _selectedColors.clear();
-                                           _selectedBrands.clear();
-                                           _priceRange = const RangeValues(0, 5000);
-                                           _hasActiveFilters = false;
-                                           _applyFilters();
-                                         });
-                                       },
-                                     ),
-                                   ),
-                                 ),
-                               ),
-                             ],
-                           ),
-                         ),
-                       ),
                     
                     // Products Section
                     SliverToBoxAdapter(
@@ -1570,6 +1318,113 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
               },
             ),
           
+          // Filter Panel - Positioned from right side with overlay
+          if (_isFilterPanelVisible) ...[
+            // Background overlay
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _closeFilter,
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                ),
+              ),
+            ),
+            // Filter Panel
+            Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                width: 320,
+                height: double.infinity,
+                child: FilterPanel(
+                  selectedProductTypes: _selectedProductTypes,
+                  selectedSizes: _selectedSizes,
+                  selectedQualities: _selectedQualities,
+                  selectedColors: _selectedColors,
+                  selectedBrands: _selectedBrands,
+                  priceRange: _priceRange,
+                  onPriceRangeChanged: (range) {
+                    setState(() {
+                      _priceRange = range;
+                      _applyFilters();
+                    });
+                  },
+                  onProductTypeChanged: (type, isSelected) {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedProductTypes.add(type);
+                      } else {
+                        _selectedProductTypes.remove(type);
+                      }
+                      _applyFilters();
+                    });
+                  },
+                  onSizeChanged: (size, isSelected) {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedSizes.add(size);
+                      } else {
+                        _selectedSizes.remove(size);
+                      }
+                      _applyFilters();
+                    });
+                  },
+                  onQualityChanged: (quality, isSelected) {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedQualities.add(quality);
+                      } else {
+                        _selectedQualities.remove(quality);
+                      }
+                      _applyFilters();
+                    });
+                  },
+                  onColorChanged: (color, isSelected) {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedColors.add(color);
+                      } else {
+                        _selectedColors.remove(color);
+                      }
+                      _applyFilters();
+                    });
+                  },
+                  onBrandChanged: (brand, isSelected) {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedBrands.add(brand);
+                      } else {
+                        _selectedBrands.remove(brand);
+                      }
+                      _applyFilters();
+                    });
+                  },
+                  onApplyFilters: () {
+                    setState(() {
+                      _applyFilters();
+                      _hasActiveFilters = _activeFilterCount > 0;
+                    });
+                  },
+                  onClose: () {
+                    _closeFilter();
+                  },
+                  onResetFilters: () {
+                    setState(() {
+                      _selectedProductTypes.clear();
+                      _selectedSizes.clear();
+                      _selectedQualities.clear();
+                      _selectedColors.clear();
+                      _selectedBrands.clear();
+                      _priceRange = const RangeValues(0, 5000);
+                      _hasActiveFilters = false;
+                      _applyFilters();
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
           
         ],
       ),
