@@ -36,14 +36,11 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
   @override
   void initState() {
     super.initState();
-    // Get ByHalit products and select 10 randomly
-    _byHalitProducts = ProductData.allProducts
-        .where((product) => product.brand == 'By Halit')
-        .toList();
+    // Get best sellers products
+    _byHalitProducts = ProductData.bestSellers;
     
-    _bestSellingProducts = _getRandomProducts(_byHalitProducts, 10);
-    // Duplicate the list for infinite scroll effect
-    _bestSellingProducts = [..._bestSellingProducts, ..._bestSellingProducts];
+    _bestSellingProducts = _getRandomProducts(_byHalitProducts, _byHalitProducts.length);
+    // No duplication - show exact number of products
     
     _startAutoScroll();
     _scrollController.addListener(_onScroll);
@@ -213,7 +210,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '10 Ürün',
+                    '${_byHalitProducts.length} Ürün',
                     style: TextStyle(
                       fontSize: isMobile ? 10 : 12,
                       fontWeight: FontWeight.w600,
@@ -300,95 +297,86 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                       ),
                                     ),
                                     
-                                    // Product Info - Fixed height to prevent overflow
-                                    Container(
-                                      height: isMobile ? 70 : 80,
-                                      padding: const EdgeInsets.all(6),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          // Product Name
-                                          Text(
-                                            product.name,
-                                            style: TextStyle(
-                                              fontSize: isMobile ? 10 : 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
-                                              height: 1.1,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 2),
-                                          
-                                          // Price
-                                          Text(
-                                            '${product.price.toStringAsFixed(0)} ₺',
-                                            style: TextStyle(
-                                              fontSize: isMobile ? 11 : 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.primary,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          
-                                          // Favorilere Ekle Button
-                                          SizedBox(
-                                            width: double.infinity,
-                                            child: ElevatedButton.icon(
-                                              onPressed: () {
-                                                favoritesProvider.toggleFavorite(product);
-                                                final isFavorite = favoritesProvider.isFavorite(product);
-                                                
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      isFavorite 
-                                                        ? '${product.name} favorilere eklendi' 
-                                                        : '${product.name} favorilerden çıkarıldı',
-                                                    ),
-                                                    duration: const Duration(seconds: 2),
-                                                    backgroundColor: isFavorite ? AppColors.primary : AppColors.textSecondary,
+                                                                         // Product Info
+                                     Expanded(
+                                       flex: 1,
+                                       child: Container(
+                                         padding: const EdgeInsets.all(6),
+                                         child: Column(
+                                           crossAxisAlignment: CrossAxisAlignment.start,
+                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                           children: [
+                                             // Product Name
+                                             Text(
+                                               product.name,
+                                               style: TextStyle(
+                                                 fontSize: isMobile ? 10 : 11,
+                                                 fontWeight: FontWeight.w600,
+                                                 color: AppColors.textPrimary,
+                                                 height: 1.1,
+                                               ),
+                                               maxLines: 1,
+                                               overflow: TextOverflow.ellipsis,
+                                             ),
+                                             
+                                                                                           // Favorilere Ekle Button - At the bottom
+                                              SizedBox(
+                                                width: double.infinity,
+                                                height: isMobile ? 20 : 24,
+                                                child: ElevatedButton.icon(
+                                                  onPressed: () {
+                                                    favoritesProvider.toggleFavorite(product);
+                                                    final isFavorite = favoritesProvider.isFavorite(product);
+                                                    
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          isFavorite 
+                                                            ? '${product.name} favorilere eklendi' 
+                                                            : '${product.name} favorilerden çıkarıldı',
+                                                        ),
+                                                        duration: const Duration(seconds: 2),
+                                                        backgroundColor: isFavorite ? AppColors.primary : AppColors.textSecondary,
+                                                      ),
+                                                    );
+                                                  },
+                                                  icon: Icon(
+                                                    favoritesProvider.isFavorite(product)
+                                                        ? Icons.favorite
+                                                        : Icons.favorite_border,
+                                                    size: isMobile ? 8 : 10,
                                                   ),
-                                                );
-                                              },
-                                              icon: Icon(
-                                                favoritesProvider.isFavorite(product)
-                                                    ? Icons.favorite
-                                                    : Icons.favorite_border,
-                                                size: isMobile ? 12 : 14,
-                                              ),
-                                              label: Text(
-                                                favoritesProvider.isFavorite(product)
-                                                    ? 'Favorilerden Çıkar'
-                                                    : 'Favorilere Ekle',
-                                              ),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: favoritesProvider.isFavorite(product)
-                                                    ? AppColors.error.withValues(alpha: 0.1)
-                                                    : AppColors.primary.withValues(alpha: 0.1),
-                                                foregroundColor: favoritesProvider.isFavorite(product)
-                                                    ? AppColors.error
-                                                    : AppColors.primary,
-                                                elevation: 0,
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: isMobile ? 4 : 6,
-                                                  vertical: isMobile ? 2 : 4,
-                                                ),
-                                                textStyle: TextStyle(
-                                                  fontSize: isMobile ? 8 : 9,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(6),
+                                                  label: Text(
+                                                    favoritesProvider.isFavorite(product)
+                                                        ? 'Favorilerden Çıkar'
+                                                        : 'Favorilere Ekle',
+                                                  ),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: favoritesProvider.isFavorite(product)
+                                                        ? AppColors.error.withValues(alpha: 0.1)
+                                                        : AppColors.primary.withValues(alpha: 0.1),
+                                                    foregroundColor: favoritesProvider.isFavorite(product)
+                                                        ? AppColors.error
+                                                        : AppColors.primary,
+                                                    elevation: 0,
+                                                    padding: EdgeInsets.symmetric(
+                                                      horizontal: isMobile ? 1 : 2,
+                                                      vertical: isMobile ? 0 : 1,
+                                                    ),
+                                                    textStyle: TextStyle(
+                                                      fontSize: isMobile ? 6 : 7,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(3),
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                           ],
+                                         ),
+                                       ),
+                                                                           ),
                                   ],
                                 ),
                               ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../providers/favorites_provider.dart';
+import 'package:provider/provider.dart';
 
 class Navbar extends StatefulWidget {
   final Function(String) onCategorySelected;
@@ -83,6 +85,60 @@ class _NavbarState extends State<Navbar> {
           // Right side actions
           Row(
             children: [
+              // Favorites Icon with Badge
+              Consumer<FavoritesProvider>(
+                builder: (context, favoritesProvider, child) {
+                  final favoriteCount = favoritesProvider.favorites.length;
+                  return Container(
+                    margin: const EdgeInsets.only(right: 16),
+                    child: Stack(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            // Navigate to favorites page
+                            Navigator.pushNamed(context, '/favorites');
+                          },
+                          icon: Icon(
+                            Icons.favorite,
+                            color: favoriteCount > 0 ? AppColors.primary : AppColors.textSecondary,
+                            size: 24,
+                          ),
+                          tooltip: 'Favorilerim',
+                        ),
+                        if (favoriteCount > 0)
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: AppColors.surface,
+                                  width: 1.5,
+                                ),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Text(
+                                favoriteCount.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
               TextButton(
                 onPressed: () {},
                 style: TextButton.styleFrom(

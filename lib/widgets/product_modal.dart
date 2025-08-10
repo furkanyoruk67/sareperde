@@ -45,7 +45,9 @@ class ProductModal extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.8,
                 constraints: BoxConstraints(
                   maxWidth: 1200,
-                  maxHeight: MediaQuery.of(context).size.height * 0.9,
+                  maxHeight: MediaQuery.of(context).size.height * 0.85,
+                  minWidth: 300,
+                  minHeight: 400,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -58,82 +60,84 @@ class ProductModal extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Column(
-                  children: [
-                    // Header with close button
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      // Header with close button
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Ürün Detayı',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.grey[800],
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Ürün Detayı',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
-                          ),
-                          IconButton(
-                            onPressed: onClose,
-                            icon: const Icon(Icons.close),
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.grey[200],
-                              shape: const CircleBorder(),
+                            IconButton(
+                              onPressed: onClose,
+                              icon: const Icon(Icons.close),
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.grey[100],
+                                shape: const CircleBorder(),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    // Content
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          // Responsive layout: side-by-side on large screens, stacked on small screens
-                          if (constraints.maxWidth > 800) {
-                            return Row(
-                              children: [
-                                // Left side - Image with zoom
-                                Expanded(
-                                  flex: 1,
-                                  child: _buildZoomableImage(),
-                                ),
-                                // Right side - Product details
-                                Expanded(
-                                  flex: 1,
-                                  child: _buildProductDetails(),
-                                ),
-                              ],
-                            );
-                          } else {
-                            return Column(
-                              children: [
-                                // Top - Image with zoom
-                                Expanded(
-                                  flex: 1,
-                                  child: _buildZoomableImage(),
-                                ),
-                                // Bottom - Product details
-                                Expanded(
-                                  flex: 1,
-                                  child: _buildProductDetails(),
-                                ),
-                              ],
-                            );
-                          }
-                        },
+                      // Content
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            // Responsive layout: side-by-side on large screens, stacked on small screens
+                            if (constraints.maxWidth > 800) {
+                              return Row(
+                                children: [
+                                  // Left side - Image with zoom
+                                  Expanded(
+                                    flex: 1,
+                                    child: _buildZoomableImage(),
+                                  ),
+                                  // Right side - Product details
+                                  Expanded(
+                                    flex: 1,
+                                    child: _buildProductDetails(),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Column(
+                                children: [
+                                  // Top - Image with zoom
+                                  Expanded(
+                                    flex: 1,
+                                    child: _buildZoomableImage(),
+                                  ),
+                                  // Bottom - Product details
+                                  Expanded(
+                                    flex: 1,
+                                    child: _buildProductDetails(),
+                                  ),
+                                ],
+                              );
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -178,16 +182,19 @@ class ProductModal extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           // Zoom controls
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.zoom_in, color: Colors.grey[600], size: 16),
-              const SizedBox(width: 8),
-              Text(
-                'Yakınlaştırmak için kaydırın',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
-              ),
-            ],
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.zoom_in, color: Colors.grey[600], size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  'Yakınlaştırmak için kaydırın',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -200,43 +207,25 @@ class ProductModal extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product name with better styling
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue[50]!, Colors.white],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue[100]!),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  selectedProduct!.name,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey[800],
-                    height: 1.3,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${selectedProduct!.price.toStringAsFixed(0)} ₺',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
+                     // Product name with better styling
+           Container(
+             width: double.infinity,
+             padding: const EdgeInsets.all(16),
+             decoration: BoxDecoration(
+               color: Colors.white,
+               borderRadius: BorderRadius.circular(8),
+               border: Border.all(color: Colors.grey[200]!),
+             ),
+             child: Text(
+               selectedProduct!.name,
+               style: TextStyle(
+                 fontSize: 18,
+                 fontWeight: FontWeight.w700,
+                 color: Colors.black,
+                 height: 1.3,
+               ),
+             ),
+           ),
           const SizedBox(height: 20),
 
           // Product specifications section
@@ -244,20 +233,22 @@ class ProductModal extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Section title
-                Text(
-                  'Ürün Özellikleri',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey[700],
-                  ),
-                ),
+                                 // Section title
+                 Text(
+                   'Ürün Özellikleri',
+                   style: TextStyle(
+                     fontSize: 18,
+                     fontWeight: FontWeight.w700,
+                     color: Colors.black,
+                   ),
+                 ),
                 const SizedBox(height: 12),
                 
                 // Scrollable specifications
                 Expanded(
                   child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -267,7 +258,6 @@ class ProductModal extends StatelessWidget {
                         _buildSpecificationRow('Kalite', selectedProduct!.quality),
                         _buildSpecificationRow('Renk', selectedProduct!.color),
                         _buildSpecificationRow('Marka', selectedProduct!.brand),
-                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -277,47 +267,53 @@ class ProductModal extends StatelessWidget {
           ),
 
           // Action buttons (fixed at bottom)
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onToggleFavorite,
-                  icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-                  label: Text(isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          Container(
+            padding: const EdgeInsets.only(top: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onToggleFavorite,
+                    icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                    label: Text(
+                      isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: /* Consumer<CartProvider>(
-                  builder: (context, cartProvider, child) {
-                    final isInCart = selectedProduct != null && cartProvider.isInCart(selectedProduct!);
-                    final quantity = selectedProduct != null ? cartProvider.getQuantity(selectedProduct!) : 0;
-                    
-                    return ElevatedButton.icon(
-                      onPressed: onAddToCart,
-                      icon: Icon(isInCart ? Icons.check : Icons.shopping_cart),
-                      label: Text(isInCart ? 'Sepette (${quantity})' : 'Sepete Ekle'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: isInCart ? AppColors.success : AppColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: /* Consumer<CartProvider>(
+                    builder: (context, cartProvider, child) {
+                      final isInCart = selectedProduct != null && cartProvider.isInCart(selectedProduct!);
+                      final quantity = selectedProduct != null ? cartProvider.getQuantity(selectedProduct!) : 0;
+                      
+                      return ElevatedButton.icon(
+                        onPressed: onAddToCart,
+                        icon: Icon(isInCart ? Icons.check : Icons.shopping_cart),
+                        label: Text(isInCart ? 'Sepette (${quantity})' : 'Sepete Ekle'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: isInCart ? AppColors.success : AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ), */
-                Container(), // Placeholder for commented out Add to Cart button
-              ),
-            ],
+                      );
+                    },
+                  ), */
+                  Container(), // Placeholder for commented out Add to Cart button
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -325,19 +321,24 @@ class ProductModal extends StatelessWidget {
   }
 
   Widget _buildSpecificationRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 100,
             child: Text(
-              '$label:',
+              label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
+                color: Colors.grey[700],
               ),
             ),
           ),
@@ -347,7 +348,7 @@ class ProductModal extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[800],
+                color: Colors.black,
               ),
             ),
           ),

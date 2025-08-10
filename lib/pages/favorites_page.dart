@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 import '../models/product.dart';
 import '../providers/favorites_provider.dart';
 import '../widgets/product_modal.dart';
+import '../widgets/product_card.dart';
+import '../widgets/footer.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({Key? key}) : super(key: key);
@@ -15,141 +18,131 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage> {
   Product? _selectedProduct;
   bool _isModalOpen = false;
-  Map<Product, bool> _hoveredProducts = {};
+  int? _hoveredProductIndex;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<FavoritesProvider>(
       builder: (context, favoritesProvider, child) {
-        final favoriteProducts = favoritesProvider.favorites;
+        final favoriteProducts = favoritesProvider.favorites.toList();
         
-        return Stack(
-          children: [
-            Scaffold(
-              appBar: AppBar(
-                elevation: 0,
-                backgroundColor: AppColors.surface,
-                surfaceTintColor: AppColors.surface,
-                titleSpacing: 0,
-                title: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                        ),
-                        child: Image.asset('assets/logo1.jpg', height: 28),
-                      ),
-                      const SizedBox(width: 16),
-                      const Text(
-                        'Favorilerim',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                leading: IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
-                ),
-              ),
-              body: Column(
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: Stack(
+            children: [
+              // Main Content with Navbar
+              Column(
                 children: [
-                  // Header
+                  // Navbar at the top
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    color: AppColors.surfaceVariant,
-                    width: double.infinity,
-                    child: Row(
-                      children: [
-                        Icon(Icons.favorite, color: AppColors.error, size: 24),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Favorilerim (${favoriteProducts.length})',
-                          style: const TextStyle(
-                            fontSize: 20, 
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
+                    color: AppColors.surface,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.shadowMedium,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Image.asset('assets/logo1.jpg', height: 50),
+                            ),
+                            const SizedBox(width: 16),
+                            Flexible(
+                              child: Text(
+                                'SARE PERDE',
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w300,
+                                  color: Colors.black,
+                                  letterSpacing: 2.0,
+                                  fontStyle: FontStyle.italic,
+                                  shadows: [
+                                    Shadow(
+                                      color: AppColors.shadowMedium,
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.textSecondary,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              child: const Text('Anasayfa', style: TextStyle(fontWeight: FontWeight.w600)),
+                            ),
+                            const SizedBox(width: 16),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.favorite, color: AppColors.surface, size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Favorilerim (${favoriteProducts.length})',
+                                      style: TextStyle(
+                                        color: AppColors.surface,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  // Content
+                  
+                  // Content Area
                   Expanded(
                     child: favoriteProducts.isEmpty
                         ? _buildEmptyState()
-                        : _buildFavoritesGrid(favoriteProducts, favoritesProvider),
+                        : _buildFavoritesContent(favoriteProducts, favoritesProvider),
                   ),
                 ],
               ),
-              floatingActionButton: null, // Cart floating action button commented out
-              /* Consumer<CartProvider>(
-                builder: (context, cartProvider, child) {
-                  return FloatingActionButton.extended(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CartPage(),
-                        ),
-                      );
-                    },
-                    label: Text(
-                      'Sepetim${cartProvider.itemCount > 0 ? ' (${cartProvider.itemCount})' : ''}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    icon: Stack(
-                      children: [
-                        const Icon(Icons.shopping_cart, size: 20),
-                        if (cartProvider.itemCount > 0)
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: AppColors.error,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Text(
-                                '${cartProvider.itemCount}',
-                                style: const TextStyle(
-                                  color: AppColors.surface,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  );
-                },
-              ), */
-            ),
-            _buildProductModal(favoritesProvider),
-          ],
+              
+              // Product Modal
+              if (_isModalOpen && _selectedProduct != null)
+                Consumer<FavoritesProvider>(
+                  builder: (context, favoritesProvider, child) {
+                    return ProductModal(
+                      selectedProduct: _selectedProduct,
+                      isModalOpen: _isModalOpen,
+                      onClose: _closeProductModal,
+                      onToggleFavorite: () => _toggleFavorite(_selectedProduct!),
+                      onAddToCart: () {},
+                      isFavorite: favoritesProvider.isFavorite(_selectedProduct!),
+                    );
+                  },
+                ),
+            ],
+          ),
         );
       },
     );
@@ -175,7 +168,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           const SizedBox(height: 24),
           Text(
             'Henüz Favori Ürününüz Yok',
-            style: TextStyle(
+            style: GoogleFonts.playfairDisplay(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -210,279 +203,81 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  Widget _buildFavoritesGrid(Set<Product> favoriteProducts, FavoritesProvider favoritesProvider) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        int crossAxisCount = 3;
-        if (constraints.maxWidth >= 1400) {
-          crossAxisCount = 4;
-        } else if (constraints.maxWidth < 900) {
-          crossAxisCount = 2;
-        } else if (constraints.maxWidth < 600) {
-          crossAxisCount = 1;
-        }
-
-        return Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: GridView.builder(
-            itemCount: favoriteProducts.length,
+  Widget _buildFavoritesContent(List<Product> favoriteProducts, FavoritesProvider favoritesProvider) {
+    return CustomScrollView(
+      slivers: [
+        // Products Grid
+        SliverPadding(
+          padding: const EdgeInsets.all(8.0),
+          sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.70,
+              crossAxisCount: 5,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 0.85,
             ),
-            itemBuilder: (context, index) {
-              final product = favoriteProducts.elementAt(index);
-              final isHovered = _hoveredProducts[product] ?? false;
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final product = favoriteProducts[index];
+                final isHovered = _hoveredProductIndex == index;
 
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(
-                    color: isHovered ? AppColors.primary : AppColors.border,
-                    width: isHovered ? 2 : 1,
-                  ),
-                ),
-                clipBehavior: Clip.antiAlias,
-                elevation: isHovered ? 8 : 2,
-                shadowColor: AppColors.shadowStrong,
-                child: MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredProducts[product] = true),
-                  onExit: (_) => setState(() => _hoveredProducts[product] = false),
-                  child: Stack(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: Image.asset(
-                              product.image,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  product.name,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    color: AppColors.textPrimary,
-                                    height: 1.3,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  '${product.brand} • ${product.color}',
-                                  style: const TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${product.price.toStringAsFixed(0)} ₺',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                // Remove from favorites button
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: OutlinedButton.icon(
-                                    onPressed: () {
-                                      favoritesProvider.removeFromFavorites(product);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('${product.name} favorilerden çıkarıldı'),
-                                          backgroundColor: AppColors.success,
-                                          duration: const Duration(seconds: 2),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.favorite, size: 16, color: AppColors.error),
-                                    label: const Text(
-                                      'Favorilerden Çıkar',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.error,
-                                      ),
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: AppColors.error,
-                                      side: const BorderSide(color: AppColors.error),
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                // Add to Cart button
-                                /* Consumer<CartProvider>(
-                                  builder: (context, cartProvider, child) {
-                                    final isInCart = cartProvider.isInCart(product);
-                                    final quantity = cartProvider.getQuantity(product);
-                                    
-                                    return SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          cartProvider.addItem(product);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('${product.name} sepete eklendi'),
-                                              backgroundColor: AppColors.success,
-                                              duration: const Duration(seconds: 2),
-                                            ),
-                                          );
-                                        },
-                                        icon: Icon(
-                                          isInCart ? Icons.check : Icons.shopping_cart,
-                                          size: 16,
-                                        ),
-                                        label: Text(
-                                          isInCart ? 'Sepette (${quantity})' : 'Sepete Ekle',
-                                          style: const TextStyle(fontWeight: FontWeight.w600),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: isInCart ? AppColors.success : AppColors.primary,
-                                          foregroundColor: AppColors.surface,
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          elevation: 0,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ), */
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      // View Product button positioned in upper half of the image
-                      if (isHovered)
-                        Positioned(
-                          top: 20,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.shadowStrong,
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedProduct = product;
-                                      _isModalOpen = true;
-                                    });
-                                  },
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 12,
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.zoom_in,
-                                          color: AppColors.surface,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'Ürünü İncele',
-                                          style: TextStyle(
-                                            color: AppColors.surface,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                return Consumer<FavoritesProvider>(
+                  builder: (context, favoritesProvider, child) {
+                    return ProductCard(
+                      product: product,
+                      isHovered: isHovered,
+                      isFavorite: favoritesProvider.isFavorite(product),
+                      onHoverEnter: () => setState(() => _hoveredProductIndex = index),
+                      onHoverExit: () => setState(() => _hoveredProductIndex = null),
+                      onToggleFavorite: () => _toggleFavorite(product),
+                      onAddToCart: () {},
+                      onInspect: () => _openProductModal(product),
+                    );
+                  },
+                );
+              },
+              childCount: favoriteProducts.length,
+            ),
           ),
-        );
-      },
+        ),
+        
+        // Footer
+        SliverToBoxAdapter(
+          child: Footer(),
+        ),
+      ],
     );
   }
 
-  // Product Modal
-  Widget _buildProductModal(FavoritesProvider favoritesProvider) {
-    return ProductModal(
-      selectedProduct: _selectedProduct,
-      isModalOpen: _isModalOpen,
-      onClose: () {
-        setState(() {
-          _isModalOpen = false;
-          _selectedProduct = null;
-        });
-      },
-      onToggleFavorite: () {
-        if (_selectedProduct != null) {
-          favoritesProvider.removeFromFavorites(_selectedProduct!);
-          setState(() {
-            _isModalOpen = false;
-            _selectedProduct = null;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${_selectedProduct!.name} favorilerden çıkarıldı'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
-      },
-      onAddToCart: () {
-        // Add to Cart functionality commented out
-        /* if (_selectedProduct != null) {
-          context.read<CartProvider>().addItem(_selectedProduct!);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${_selectedProduct!.name} sepete eklendi'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        } */
-      },
-      isFavorite: _selectedProduct != null ? favoritesProvider.isFavorite(_selectedProduct!) : false,
+  void _toggleFavorite(Product product) {
+    final favoritesProvider = context.read<FavoritesProvider>();
+    favoritesProvider.toggleFavorite(product);
+    
+    final isFavorite = favoritesProvider.isFavorite(product);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isFavorite 
+            ? '${product.name} favorilere eklendi' 
+            : '${product.name} favorilerden çıkarıldı',
+        ),
+        duration: const Duration(seconds: 2),
+        backgroundColor: isFavorite ? AppColors.primary : AppColors.textSecondary,
+      ),
     );
+  }
+
+  void _openProductModal(Product product) {
+    setState(() {
+      _selectedProduct = product;
+      _isModalOpen = true;
+    });
+  }
+
+  void _closeProductModal() {
+    setState(() {
+      _isModalOpen = false;
+      _selectedProduct = null;
+    });
   }
 }

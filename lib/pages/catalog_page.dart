@@ -679,20 +679,54 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                               ),
                               child: Consumer<FavoritesProvider>(
                                 builder: (context, favoritesProvider, child) {
-                                  return IconButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => FavoritesPage()),
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.favorite,
-                                      color: favoritesProvider.favorites.isNotEmpty
-                                          ? AppColors.error
-                                          : AppColors.textSecondary,
-                                      size: 22,
-                                    ),
+                                  final favoriteCount = favoritesProvider.favorites.length;
+                                  return Stack(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => FavoritesPage()),
+                                          );
+                                        },
+                                        icon: Icon(
+                                          Icons.favorite,
+                                          color: favoriteCount > 0
+                                              ? AppColors.error
+                                              : AppColors.textSecondary,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      if (favoriteCount > 0)
+                                        Positioned(
+                                          right: 8,
+                                          top: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.error,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: AppColors.surface,
+                                                width: 1,
+                                              ),
+                                            ),
+                                            constraints: const BoxConstraints(
+                                              minWidth: 12,
+                                              minHeight: 12,
+                                            ),
+                                            child: Text(
+                                              favoriteCount.toString(),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   );
                                 },
                               ),
