@@ -925,13 +925,13 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                );
                              } else {
                                // Desktop layout: Side by side
-                               return Row(
-                                 children: [
-                                   // Video Section (Left side)
-                                   Expanded(
-                                     flex: 5,
-                                     child: Container(
-                                       margin: const EdgeInsets.only(right: 2),
+                                                               return Row(
+                                  children: [
+                                    // Video Section (Left side) - Daha sola kaydırıldı
+                                                                         Expanded(
+                                       flex: 1,
+                                       child: Container(
+                                         margin: const EdgeInsets.only(right: 8),
                                        child: Stack(
                                          children: [
                                            // Video as background
@@ -994,14 +994,157 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                      ),
                                    ),
                                    
-                                   // Best Sellers Section (Right side)
-                                   Expanded(
-                                     flex: 3,
+                                                                       // En Çok Satanlar Section (Right side) - Video ile aynı satırda
+                                    Expanded(
+                                      flex: 2,
                                      child: Container(
-                                       margin: const EdgeInsets.only(left: 2),
-                                       child: BestSellersCarousel(
-                                         height: 300,
-                                         width: double.infinity,
+                                       height: 300,
+                                       decoration: BoxDecoration(
+                                         color: AppColors.surface,
+                                         borderRadius: BorderRadius.circular(12),
+                                         border: Border.all(color: AppColors.border, width: 1),
+                                       ),
+                                       child: Column(
+                                         crossAxisAlignment: CrossAxisAlignment.start,
+                                         children: [
+                                                                                       // Başlık
+                                            Padding(
+                                              padding: const EdgeInsets.all(12),
+                                              child: Text(
+                                                'En Çok Satanlar',
+                                                style: GoogleFonts.playfairDisplay(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColors.textPrimary,
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                              ),
+                                            ),
+                                           // Ürün listesi
+                                           Expanded(
+                                             child: ListView.builder(
+                                               scrollDirection: Axis.horizontal,
+                                               padding: const EdgeInsets.symmetric(horizontal: 8),
+                                               itemCount: ProductData.allProducts.take(3).length,
+                                               itemBuilder: (context, index) {
+                                                 final product = ProductData.allProducts[index];
+                                                                                                                                                     return GestureDetector(
+                                                    onTap: () => _openProductModal(product),
+                                                    child: Container(
+                                                      width: 160,
+                                                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                                                      child: Card(
+                                                        elevation: 4,
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.circular(12),
+                                                        ),
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            // Ürün resmi
+                                                            ClipRRect(
+                                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                                              child: Container(
+                                                                height: 120,
+                                                                width: double.infinity,
+                                                                decoration: BoxDecoration(
+                                                                  gradient: LinearGradient(
+                                                                    begin: Alignment.topCenter,
+                                                                    end: Alignment.bottomCenter,
+                                                                    colors: [
+                                                                      AppColors.surfaceVariant,
+                                                                      AppColors.surface,
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                child: Image.asset(
+                                                                  product.image,
+                                                                  height: 120,
+                                                                  width: double.infinity,
+                                                                  fit: BoxFit.cover,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                                                                                         // Ürün bilgileri
+                                                             Padding(
+                                                               padding: const EdgeInsets.all(12),
+                                                               child: Column(
+                                                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                                                 children: [
+                                                                   Text(
+                                                                     product.name,
+                                                                     style: TextStyle(
+                                                                       fontSize: 13,
+                                                                       fontWeight: FontWeight.w600,
+                                                                       color: AppColors.textPrimary,
+                                                                       height: 1.2,
+                                                                     ),
+                                                                     maxLines: 2,
+                                                                     overflow: TextOverflow.ellipsis,
+                                                                   ),
+                                                                   const SizedBox(height: 8),
+                                                                   Container(
+                                                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                                     decoration: BoxDecoration(
+                                                                       color: AppColors.primary.withValues(alpha: 0.1),
+                                                                       borderRadius: BorderRadius.circular(8),
+                                                                     ),
+                                                                     child: Text(
+                                                                       'Popüler',
+                                                                       style: TextStyle(
+                                                                         fontSize: 10,
+                                                                         fontWeight: FontWeight.w600,
+                                                                         color: AppColors.primary,
+                                                                       ),
+                                                                     ),
+                                                                   ),
+                                                                 ],
+                                                               ),
+                                                             ),
+                                                             // Favorilere Ekle butonu - En altta
+                                                             Padding(
+                                                               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                                                               child: Consumer<FavoritesProvider>(
+                                                                 builder: (context, favoritesProvider, child) {
+                                                                   return SizedBox(
+                                                                     width: double.infinity,
+                                                                     child: TextButton(
+                                                                       onPressed: () => _toggleFavorite(product),
+                                                                       style: TextButton.styleFrom(
+                                                                         padding: const EdgeInsets.symmetric(vertical: 8),
+                                                                         backgroundColor: favoritesProvider.isFavorite(product)
+                                                                             ? AppColors.error.withValues(alpha: 0.1)
+                                                                             : AppColors.primary.withValues(alpha: 0.1),
+                                                                         shape: RoundedRectangleBorder(
+                                                                           borderRadius: BorderRadius.circular(8),
+                                                                         ),
+                                                                       ),
+                                                                       child: Text(
+                                                                         favoritesProvider.isFavorite(product)
+                                                                             ? 'Favorilerden Çıkar'
+                                                                             : 'Favorilere Ekle',
+                                                                         style: TextStyle(
+                                                                           fontSize: 11,
+                                                                           fontWeight: FontWeight.w600,
+                                                                           color: favoritesProvider.isFavorite(product)
+                                                                               ? AppColors.error
+                                                                               : AppColors.primary,
+                                                                         ),
+                                                                       ),
+                                                                     ),
+                                                                   );
+                                                                 },
+                                                               ),
+                                                             ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                               },
+                                             ),
+                                           ),
+                                         ],
                                        ),
                                      ),
                                    ),

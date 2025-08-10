@@ -30,13 +30,10 @@ class _StickyVideoPlayerState extends State<StickyVideoPlayer>
   late final AnimationController _sizeController;
   late final AnimationController _opacityController;
   late final Animation<double> _sizeAnimation;
-  late final Animation<double> _opacityAnimation;
-
   YoutubePlayerController? _controller;
   bool _isSticky = false;
   bool _isInitialized = false;
   bool _hasError = false;
-  bool _isPlaying = false;
 
   @override
   void initState() {
@@ -57,10 +54,7 @@ class _StickyVideoPlayerState extends State<StickyVideoPlayer>
       end: widget.stickyHeight,
     ).animate(CurvedAnimation(parent: _sizeController, curve: Curves.easeInOut));
 
-    _opacityAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.8,
-    ).animate(CurvedAnimation(parent: _opacityController, curve: Curves.easeInOut));
+
   }
 
   void _initializeYouTubePlayer() {
@@ -78,13 +72,7 @@ class _StickyVideoPlayerState extends State<StickyVideoPlayer>
       ),
     );
 
-    _controller!.listen((event) {
-      if (event is YoutubePlayerValue) {
-        setState(() {
-          _isPlaying = event.playerState == PlayerState.playing;
-        });
-      }
-    });
+
 
     setState(() {
       _isInitialized = true;
@@ -103,10 +91,8 @@ class _StickyVideoPlayerState extends State<StickyVideoPlayer>
 
           if (shouldBeSticky) {
             _sizeController.forward();
-            _opacityController.forward();
           } else {
             _sizeController.reverse();
-            _opacityController.reverse();
           }
         }
       });

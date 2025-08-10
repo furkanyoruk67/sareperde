@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
 import '../models/product.dart';
-import '../providers/cart_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../widgets/product_modal.dart';
-import 'cart_page.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({Key? key}) : super(key: key);
