@@ -6,6 +6,7 @@ import '../models/product.dart';
 import '../providers/favorites_provider.dart';
 import '../widgets/product_modal.dart';
 import '../widgets/product_card.dart';
+
 import '../widgets/footer.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -26,9 +27,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
       builder: (context, favoritesProvider, child) {
         final favoriteProducts = favoritesProvider.favorites.toList();
         
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          body: Stack(
+            return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Stack(
             children: [
               // Main Content with Navbar
               Column(

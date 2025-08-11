@@ -40,11 +40,14 @@ class FilterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    
     return Material(
       elevation: 99999,
       color: Colors.transparent,
       child: Container(
-        width: 280,
+        width: isMobile ? double.infinity : 280,
         height: double.infinity,
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -67,13 +70,16 @@ class FilterPanel extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(isMobile ? 4 : 8),
           child: Column(
             children: [
               // Panel başlığı
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 12 : 16, 
+                  vertical: isMobile ? 8 : 12
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(12),
@@ -90,14 +96,14 @@ class FilterPanel extends StatelessWidget {
                     Icon(
                       Icons.filter_alt,
                       color: AppColors.surface,
-                      size: 18,
+                      size: isMobile ? 16 : 18,
                     ),
-                    const SizedBox(width: 8),
-                    const Expanded(
+                    SizedBox(width: isMobile ? 6 : 8),
+                    Expanded(
                       child: Text(
                         'FİLTRELER',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: isMobile ? 12 : 14,
                           fontWeight: FontWeight.w700,
                           color: AppColors.surface,
                           letterSpacing: 0.5,

@@ -19,13 +19,16 @@ class ProductCard extends StatelessWidget {
     required this.isFavorite,
     required this.onHoverEnter,
     required this.onHoverExit,
-    required this.onToggleFavorite,
     required this.onAddToCart,
+    required this.onToggleFavorite,
     required this.onInspect,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -46,167 +49,122 @@ class ProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: Image.asset(
-                    product.image,
-                    fit: BoxFit.cover,
+                  child: Stack(
+                    children: [
+                      Image.asset(
+                        product.image,
+                        fit: BoxFit.cover,
+                      ),
+                      // Hover overlay with inspect button
+                      if (isHovered)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.3),
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                topRight: Radius.circular(16),
+                              ),
+                            ),
+                            child: Center(
+                              child: ElevatedButton.icon(
+                                onPressed: onInspect,
+                                icon: Icon(
+                                  Icons.visibility,
+                                  size: isMobile ? 16 : 20,
+                                  color: Colors.white,
+                                ),
+                                label: Text(
+                                  'İncele',
+                                  style: TextStyle(
+                                    fontSize: isMobile ? 12 : 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isMobile ? 12 : 16,
+                                    vertical: isMobile ? 8 : 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                                 Padding(
-                   padding: const EdgeInsets.all(6.0),
-                   child: Column(
+                Padding(
+                  padding: EdgeInsets.all(isMobile ? 4.0 : 6.0),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         product.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                                                 style: const TextStyle(
-                           fontWeight: FontWeight.w600,
-                           fontSize: 11,
-                           color: AppColors.textPrimary,
-                           height: 1.1,
-                         ),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: isMobile ? 10 : 11,
+                          color: AppColors.textPrimary,
+                          height: 1.1,
+                        ),
                       ),
-                                             const SizedBox(height: 2),
-                       Text(
-                         '${product.brand} • ${product.color}',
-                         style: const TextStyle(
-                           color: AppColors.textSecondary,
-                           fontSize: 9,
-                           fontWeight: FontWeight.w500,
-                         ),
-                       ),
-                       const SizedBox(height: 3),
-                       // Text(
-                       //   '${product.price.toStringAsFixed(0)} ₺',
-                       //   style: const TextStyle(
-                       //     fontWeight: FontWeight.bold,
-                       //     fontSize: 12,
-                       //     color: AppColors.primary,
-                       //   ),
-                       // ),
-                       const SizedBox(height: 4),
-                      // Add to Favorites button
+                      SizedBox(height: isMobile ? 1 : 2),
+                      Text(
+                        '${product.brand} • ${product.color}',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: isMobile ? 8 : 9,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: isMobile ? 2 : 3),
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           onPressed: onToggleFavorite,
                           icon: Icon(
                             isFavorite ? Icons.favorite : Icons.favorite_border,
-                            size: 14,
+                            size: isMobile ? 12 : 14,
                             color: isFavorite ? AppColors.error : AppColors.textSecondary,
                           ),
                           label: Text(
                             isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle',
                             style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
+                              fontSize: isMobile ? 8 : 10,
+                              fontWeight: FontWeight.w500,
                               color: isFavorite ? AppColors.error : AppColors.textSecondary,
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: isFavorite ? AppColors.error : AppColors.textSecondary,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isMobile ? 4 : 8,
+                              vertical: isMobile ? 2 : 4,
+                            ),
                             side: BorderSide(
                               color: isFavorite ? AppColors.error : AppColors.border,
+                              width: 1,
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 4),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(isMobile ? 4 : 6),
                             ),
                           ),
                         ),
-                                             ),
-                       const SizedBox(height: 4),
-                       // Add to Cart button
-                      /* Consumer<CartProvider>(
-                        builder: (context, cartProvider, child) {
-                          final isInCart = cartProvider.isInCart(product);
-                          final quantity = cartProvider.getQuantity(product);
-                          
-                          return SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: onAddToCart,
-                              icon: Icon(
-                                isInCart ? Icons.check : Icons.shopping_cart,
-                                size: 14,
-                              ),
-                              label: Text(
-                                isInCart ? 'Sepette (${quantity})' : 'Sepete Ekle',
-                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isInCart ? AppColors.success : AppColors.primary,
-                                foregroundColor: AppColors.surface,
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ), */
+                      ),
+                      SizedBox(height: isMobile ? 2 : 4),
                     ],
                   ),
                 ),
               ],
             ),
-            // View Product button positioned in upper half of the image
-            if (isHovered)
-              Positioned(
-                top: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.shadowStrong,
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: onInspect,
-                        borderRadius: BorderRadius.circular(12),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.zoom_in,
-                                color: AppColors.surface,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Ürünü İncele',
-                                style: TextStyle(
-                                  color: AppColors.surface,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+
           ],
         ),
       ),

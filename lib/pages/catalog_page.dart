@@ -13,6 +13,7 @@ import '../widgets/footer.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_modal.dart';
 import '../widgets/best_sellers_carousel.dart';
+
 import 'favorites_page.dart';
 import '../widgets/dimension_dialog.dart';
 
@@ -577,167 +578,287 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+    
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: isMobile ? AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Image.asset('assets/logo1.jpg', height: 32),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                'SARE PERDE',
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w300,
+                  color: Colors.black,
+                  letterSpacing: 1.0,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => _showSearchDialog(),
+            icon: Icon(Icons.search, color: AppColors.textSecondary),
+          ),
+          Consumer<FavoritesProvider>(
+            builder: (context, favoritesProvider, child) {
+              final favoriteCount = favoritesProvider.favorites.length;
+              return Stack(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FavoritesPage()),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.favorite,
+                      color: favoriteCount > 0 ? AppColors.error : AppColors.textSecondary,
+                    ),
+                  ),
+                  if (favoriteCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 12,
+                          minHeight: 12,
+                        ),
+                        child: Text(
+                          favoriteCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              switch (value) {
+                case 'home':
+                  // Anasayfa navigation
+                  break;
+                case 'tul':
+                case 'stor':
+                case 'fon':
+                case 'jaluzi':
+                case 'plise':
+                case 'aksesuar':
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('$value kategorisi yakında kullanılabilir olacak!'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(value: 'home', child: Text('Anasayfa')),
+              PopupMenuItem(value: 'tul', child: Text('Tül')),
+              PopupMenuItem(value: 'stor', child: Text('Stor Perde')),
+              PopupMenuItem(value: 'fon', child: Text('Fon Perde')),
+              PopupMenuItem(value: 'jaluzi', child: Text('Jaluzi')),
+              PopupMenuItem(value: 'plise', child: Text('Plise')),
+              PopupMenuItem(value: 'aksesuar', child: Text('Aksesuar')),
+            ],
+            child: Icon(Icons.menu, color: AppColors.textSecondary),
+          ),
+        ],
+      ) : null,
       body: Stack(
         children: [
           // Main Content with Navbar
           Column(
             children: [
-              // Navbar at the top
-              Container(
-                color: AppColors.surface,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.shadowMedium,
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Image.asset('assets/logo1.jpg', height: 50),
-                        ),
-                        const SizedBox(width: 16),
-                        Flexible(
-                          child: Text(
-                            'SARE PERDE',
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w300,
-                              color: Colors.black,
-                              letterSpacing: 2.0,
-                              fontStyle: FontStyle.italic,
-                              shadows: [
-                                Shadow(
+              // Desktop Navbar
+              if (!isMobile)
+                Container(
+                  color: AppColors.surface,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
                                   color: AppColors.shadowMedium,
-                                  blurRadius: 4,
+                                  blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
-                            overflow: TextOverflow.ellipsis,
+                            child: Image.asset('assets/logo1.jpg', height: 50),
                           ),
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: () {
-                            // Anasayfa navigation
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.textSecondary,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: const Text('Anasayfa', style: TextStyle(fontWeight: FontWeight.w600)),
-                        ),
-                        const SizedBox(width: 8),
-                        _buildAnimatedCategoryButton('Tül', ['Bambu', 'Keten', 'Krep', 'File']),
-                        const SizedBox(width: 8),
-                        _buildAnimatedCategoryButton('Stor Perde', ['Keten', 'Panama', 'Mat', 'Güneşlik', 'Lazer Kesim', 'Simli']),
-                        const SizedBox(width: 8),
-                        _buildAnimatedCategoryButton('Fon Perde', ['Dokuma', 'Keten Doku', 'Saten', 'Örme']),
-                        const SizedBox(width: 8),
-                        _buildAnimatedCategoryButton('Jaluzi', ['Plastik', 'Kumaş', 'Alüminyum', 'Ahşap']),
-                        const SizedBox(width: 8),
-                        _buildAnimatedCategoryButton('Plise', ['Black-out', 'Keten', 'Honeycamp']),
-                        const SizedBox(width: 8),
-                        _buildAnimatedCategoryButton('Aksesuar', ['Rustik', 'Broçal', 'Püskül', 'Korniş', 'Sarkıt', 'Elçek', 'Bordür']),
-                        const SizedBox(width: 8),
-                        // Search and Favorites icons
-                        Row(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceVariant,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.border),
+                          const SizedBox(width: 16),
+                          Flexible(
+                            child: Text(
+                              'SARE PERDE',
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w300,
+                                color: Colors.black,
+                                letterSpacing: 2.0,
+                                fontStyle: FontStyle.italic,
+                                shadows: [
+                                  Shadow(
+                                    color: AppColors.shadowMedium,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: IconButton(
-                                onPressed: () {
-                                  _showSearchDialog();
-                                },
-                                icon: Icon(Icons.search, color: AppColors.textSecondary, size: 22),
-                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceVariant,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.border),
+                          ),
+                          const Spacer(),
+                          if (!isTablet) ...[
+                            TextButton(
+                              onPressed: () {
+                                // Anasayfa navigation
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.textSecondary,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
-                              child: Consumer<FavoritesProvider>(
-                                builder: (context, favoritesProvider, child) {
-                                  final favoriteCount = favoritesProvider.favorites.length;
-                                  return Stack(
-                                    children: [
-                                      IconButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(builder: (context) => FavoritesPage()),
-                                          );
-                                        },
-                                        icon: Icon(
-                                          Icons.favorite,
-                                          color: favoriteCount > 0
-                                              ? AppColors.error
-                                              : AppColors.textSecondary,
-                                          size: 22,
-                                        ),
-                                      ),
-                                      if (favoriteCount > 0)
-                                        Positioned(
-                                          right: 8,
-                                          top: 8,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.error,
-                                              borderRadius: BorderRadius.circular(8),
-                                              border: Border.all(
-                                                color: AppColors.surface,
-                                                width: 1,
-                                              ),
-                                            ),
-                                            constraints: const BoxConstraints(
-                                              minWidth: 12,
-                                              minHeight: 12,
-                                            ),
-                                            child: Text(
-                                              favoriteCount.toString(),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 8,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
+                              child: const Text('Anasayfa', style: TextStyle(fontWeight: FontWeight.w600)),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildAnimatedCategoryButton('Tül', ['Bambu', 'Keten', 'Krep', 'File']),
+                            const SizedBox(width: 8),
+                            _buildAnimatedCategoryButton('Stor Perde', ['Keten', 'Panama', 'Mat', 'Güneşlik', 'Lazer Kesim', 'Simli']),
+                            const SizedBox(width: 8),
+                            _buildAnimatedCategoryButton('Fon Perde', ['Dokuma', 'Keten Doku', 'Saten', 'Örme']),
+                            const SizedBox(width: 8),
+                            _buildAnimatedCategoryButton('Jaluzi', ['Plastik', 'Kumaş', 'Alüminyum', 'Ahşap']),
+                            const SizedBox(width: 8),
+                            _buildAnimatedCategoryButton('Plise', ['Black-out', 'Keten', 'Honeycamp']),
+                            const SizedBox(width: 8),
+                            _buildAnimatedCategoryButton('Aksesuar', ['Rustik', 'Broçal', 'Püskül', 'Korniş', 'Sarkıt', 'Elçek', 'Bordür']),
+                            const SizedBox(width: 8),
+                          ],
+                          // Search and Favorites icons
+                          Row(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                child: IconButton(
+                                  onPressed: () {
+                                    _showSearchDialog();
+                                  },
+                                  icon: Icon(Icons.search, color: AppColors.textSecondary, size: 22),
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                child: Consumer<FavoritesProvider>(
+                                  builder: (context, favoritesProvider, child) {
+                                    final favoriteCount = favoritesProvider.favorites.length;
+                                    return Stack(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => FavoritesPage()),
+                                            );
+                                          },
+                                          icon: Icon(
+                                            Icons.favorite,
+                                            color: favoriteCount > 0
+                                                ? AppColors.error
+                                                : AppColors.textSecondary,
+                                            size: 22,
                                           ),
                                         ),
-                                    ],
-                                  );
-                                },
+                                        if (favoriteCount > 0)
+                                          Positioned(
+                                            right: 8,
+                                            top: 8,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.error,
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: AppColors.surface,
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              constraints: const BoxConstraints(
+                                                minWidth: 12,
+                                                minHeight: 12,
+                                              ),
+                                              child: Text(
+                                                favoriteCount.toString(),
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 8,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
               // Main scrollable content
               Expanded(
                 child: CustomScrollView(
@@ -747,12 +868,12 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                     SliverToBoxAdapter(
                       child: Container(
                         width: double.infinity,
-                        height: 400,
+                        height: isMobile ? 250 : 400,
                         child: PageView.builder(
                           itemCount: 3,
                           itemBuilder: (context, index) {
                             return Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              margin: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 16, vertical: 8),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
@@ -793,15 +914,15 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                       ),
                                     ),
                                     Positioned(
-                                      bottom: 40,
-                                      left: 40,
+                                      bottom: isMobile ? 20 : 40,
+                                      left: isMobile ? 20 : 40,
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'SARE PERDE',
                                             style: TextStyle(
-                                              fontSize: 48,
+                                              fontSize: isMobile ? 24 : 48,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
                                               shadows: [
@@ -817,7 +938,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                           Text(
                                             'Kaliteli Perde Çözümleri',
                                             style: TextStyle(
-                                              fontSize: 24,
+                                              fontSize: isMobile ? 14 : 24,
                                               fontWeight: FontWeight.w300,
                                               color: Colors.white,
                                               shadows: [
@@ -837,15 +958,18 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: AppColors.primary,
                                               foregroundColor: AppColors.surface,
-                                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: isMobile ? 16 : 24, 
+                                                vertical: isMobile ? 8 : 12
+                                              ),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                             ),
-                                            child: const Text(
+                                            child: Text(
                                               'Ürünleri Keşfet',
                                               style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: isMobile ? 12 : 16,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
@@ -952,6 +1076,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                        child: BestSellersCarousel(
                                          height: 180,
                                          width: double.infinity,
+                                         onProductInspect: (Product product) {
+                                           _openProductModal(product);
+                                         },
                                        ),
                                      ),
                                    ),
@@ -1036,6 +1163,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                         child: BestSellersCarousel(
                                           height: 300,
                                           width: double.infinity,
+                                          onProductInspect: (Product product) {
+                                            _openProductModal(product);
+                                          },
                                         ),
                                       ),
                                     ),
@@ -1051,44 +1181,46 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                     // Products Section
                     SliverToBoxAdapter(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 16 : 32, 
+                          vertical: isMobile ? 16 : 20
+                        ),
                         width: double.infinity,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
+                        child: isMobile 
+                          ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   _isSearching ? 'Arama Sonuçları' : (_hasActiveFilters ? 'Katalog' : 'Anasayfa'),
-                                  style: const TextStyle(
-                                    fontSize: 24,
+                                  style: TextStyle(
+                                    fontSize: isMobile ? 20 : 24,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 8),
                                 if (_isSearching) ...[
                                   Row(
                                     children: [
                                       Icon(Icons.search, color: AppColors.primary, size: 16),
                                       const SizedBox(width: 8),
-                                      Text(
-                                        '"$_searchQuery" için ${_visibleProducts.length} sonuç bulundu',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: AppColors.textSecondary,
+                                      Expanded(
+                                        child: Text(
+                                          '"$_searchQuery" için ${_visibleProducts.length} sonuç bulundu',
+                                          style: TextStyle(
+                                            fontSize: isMobile ? 14 : 16,
+                                            color: AppColors.textSecondary,
+                                          ),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
                                       TextButton(
                                         onPressed: _clearSearch,
                                         child: Text(
                                           'Temizle',
                                           style: TextStyle(
                                             color: AppColors.primary,
-                                            fontSize: 14,
+                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
@@ -1097,210 +1229,445 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                 ] else if (_hasActiveFilters)
                                   Text(
                                     '${_visibleProducts.length} ürün bulundu',
-                                    style: const TextStyle(
-                                      fontSize: 24,
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 16 : 24,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.textPrimary,
                                       letterSpacing: -0.5,
                                     ),
                                   ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: SizedBox(
+                                        height: 40,
+                                        child: PopupMenuButton<SortOption>(
+                                          onSelected: _changeSortOption,
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              value: SortOption.nameAZ,
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.sort_by_alpha,
+                                                    size: 16,
+                                                    color: _currentSortOption == SortOption.nameAZ
+                                                        ? AppColors.primary
+                                                        : AppColors.textSecondary,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    'İsim (A-Z)',
+                                                    style: TextStyle(
+                                                      color: _currentSortOption == SortOption.nameAZ
+                                                          ? AppColors.primary
+                                                          : AppColors.textSecondary,
+                                                      fontWeight: _currentSortOption == SortOption.nameAZ
+                                                          ? FontWeight.w600
+                                                          : FontWeight.normal,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              value: SortOption.nameZA,
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.sort_by_alpha,
+                                                    size: 16,
+                                                    color: _currentSortOption == SortOption.nameZA
+                                                        ? AppColors.primary
+                                                        : AppColors.textSecondary,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    'İsim (Z-A)',
+                                                    style: TextStyle(
+                                                      color: _currentSortOption == SortOption.nameZA
+                                                          ? AppColors.primary
+                                                          : AppColors.textSecondary,
+                                                      fontWeight: _currentSortOption == SortOption.nameZA
+                                                          ? FontWeight.w600
+                                                          : FontWeight.normal,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              value: SortOption.priceLowHigh,
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.attach_money,
+                                                    size: 16,
+                                                    color: _currentSortOption == SortOption.priceLowHigh
+                                                        ? AppColors.primary
+                                                        : AppColors.textSecondary,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    'Fiyat (Düşük-Yüksek)',
+                                                    style: TextStyle(
+                                                      color: _currentSortOption == SortOption.priceLowHigh
+                                                          ? AppColors.primary
+                                                          : AppColors.textSecondary,
+                                                      fontWeight: _currentSortOption == SortOption.priceLowHigh
+                                                          ? FontWeight.w600
+                                                          : FontWeight.normal,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              value: SortOption.priceHighLow,
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.attach_money,
+                                                    size: 16,
+                                                    color: _currentSortOption == SortOption.priceHighLow
+                                                        ? AppColors.primary
+                                                        : AppColors.textSecondary,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    'Fiyat (Yüksek-Düşük)',
+                                                    style: TextStyle(
+                                                      color: _currentSortOption == SortOption.priceHighLow
+                                                          ? AppColors.primary
+                                                          : AppColors.textSecondary,
+                                                      fontWeight: _currentSortOption == SortOption.priceHighLow
+                                                          ? FontWeight.w600
+                                                          : FontWeight.normal,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.surface,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(color: AppColors.border),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.sort, size: 16, color: AppColors.textSecondary),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  'Sırala',
+                                                  style: TextStyle(
+                                                    fontSize: isMobile ? 12 : 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.textSecondary,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Icon(Icons.arrow_drop_down, size: 16, color: AppColors.textSecondary),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    SizedBox(
+                                      height: 40,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          if (isFilterOpen) {
+                                            _closeFilter();
+                                          } else {
+                                            _openFilter();
+                                          }
+                                        },
+                                        icon: Icon(
+                                          Icons.filter_list,
+                                          size: 16,
+                                          color: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
+                                        ),
+                                        label: Text(
+                                          'Filtrele',
+                                          style: TextStyle(
+                                            fontSize: isMobile ? 12 : 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
+                                          ),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: _isFilterPanelVisible ? AppColors.primary : AppColors.surface,
+                                          foregroundColor: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                          elevation: _isFilterPanelVisible ? 2 : 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                            side: BorderSide(
+                                              color: _isFilterPanelVisible ? AppColors.primary : AppColors.border,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
-                            ),
-                            Row(
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                SizedBox(
-                                  height: 40,
-                                  width: 120,
-                                  child: PopupMenuButton<SortOption>(
-                                    onSelected: _changeSortOption,
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                        value: SortOption.nameAZ,
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.sort_by_alpha,
-                                              size: 16,
-                                              color: _currentSortOption == SortOption.nameAZ
-                                                  ? AppColors.primary
-                                                  : AppColors.textSecondary,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              'İsim (A-Z)',
-                                              style: TextStyle(
-                                                color: _currentSortOption == SortOption.nameAZ
-                                                    ? AppColors.primary
-                                                    : AppColors.textSecondary,
-                                                fontWeight: _currentSortOption == SortOption.nameAZ
-                                                    ? FontWeight.w600
-                                                    : FontWeight.normal,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _isSearching ? 'Arama Sonuçları' : (_hasActiveFilters ? 'Katalog' : 'Anasayfa'),
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                        letterSpacing: -0.5,
                                       ),
-                                      PopupMenuItem(
-                                        value: SortOption.nameZA,
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.sort_by_alpha,
-                                              size: 16,
-                                              color: _currentSortOption == SortOption.nameZA
-                                                  ? AppColors.primary
-                                                  : AppColors.textSecondary,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              'İsim (Z-A)',
-                                              style: TextStyle(
-                                                color: _currentSortOption == SortOption.nameZA
-                                                    ? AppColors.primary
-                                                    : AppColors.textSecondary,
-                                                fontWeight: _currentSortOption == SortOption.nameZA
-                                                    ? FontWeight.w600
-                                                    : FontWeight.normal,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuItem(
-                                        value: SortOption.priceLowHigh,
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.attach_money,
-                                              size: 16,
-                                              color: _currentSortOption == SortOption.priceLowHigh
-                                                  ? AppColors.primary
-                                                  : AppColors.textSecondary,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              'Fiyat (Düşük-Yüksek)',
-                                              style: TextStyle(
-                                                color: _currentSortOption == SortOption.priceLowHigh
-                                                    ? AppColors.primary
-                                                    : AppColors.textSecondary,
-                                                fontWeight: _currentSortOption == SortOption.priceLowHigh
-                                                    ? FontWeight.w600
-                                                    : FontWeight.normal,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuItem(
-                                        value: SortOption.priceHighLow,
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.attach_money,
-                                              size: 16,
-                                              color: _currentSortOption == SortOption.priceHighLow
-                                                  ? AppColors.primary
-                                                  : AppColors.textSecondary,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              'Fiyat (Yüksek-Düşük)',
-                                              style: TextStyle(
-                                                color: _currentSortOption == SortOption.priceHighLow
-                                                    ? AppColors.primary
-                                                    : AppColors.textSecondary,
-                                                fontWeight: _currentSortOption == SortOption.priceHighLow
-                                                    ? FontWeight.w600
-                                                    : FontWeight.normal,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surface,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: AppColors.border),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    if (_isSearching) ...[
+                                      Row(
                                         children: [
-                                          Icon(Icons.sort, size: 16, color: AppColors.textSecondary),
+                                          Icon(Icons.search, color: AppColors.primary, size: 16),
                                           const SizedBox(width: 8),
-                                          const Text(
-                                            'Sırala',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
+                                          Text(
+                                            '"$_searchQuery" için ${_visibleProducts.length} sonuç bulundu',
+                                            style: const TextStyle(
+                                              fontSize: 16,
                                               color: AppColors.textSecondary,
                                             ),
                                           ),
-                                          const SizedBox(width: 4),
-                                          Icon(Icons.arrow_drop_down, size: 16, color: AppColors.textSecondary),
+                                          const SizedBox(width: 8),
+                                          TextButton(
+                                            onPressed: _clearSearch,
+                                            child: Text(
+                                              'Temizle',
+                                              style: TextStyle(
+                                                color: AppColors.primary,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
                                         ],
                                       ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                SizedBox(
-                                  height: 40,
-                                  width: 120,
-                                                                     child: ElevatedButton.icon(
-                                     onPressed: () {
-                                       if (isFilterOpen) {
-                                         _closeFilter();
-                                       } else {
-                                         _openFilter();
-                                       }
-                                     },
-                                    icon: Icon(
-                                      Icons.filter_list,
-                                      size: 16,
-                                      color: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
-                                    ),
-                                    label: Text(
-                                      'Filtrele',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
+                                    ] else if (_hasActiveFilters)
+                                      Text(
+                                        '${_visibleProducts.length} ürün bulundu',
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                          letterSpacing: -0.5,
+                                        ),
                                       ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: _isFilterPanelVisible ? AppColors.primary : AppColors.surface,
-                                      foregroundColor: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                      elevation: _isFilterPanelVisible ? 2 : 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                        side: BorderSide(
-                                          color: _isFilterPanelVisible ? AppColors.primary : AppColors.border,
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      height: 40,
+                                      width: 120,
+                                      child: PopupMenuButton<SortOption>(
+                                        onSelected: _changeSortOption,
+                                        itemBuilder: (context) => [
+                                          PopupMenuItem(
+                                            value: SortOption.nameAZ,
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.sort_by_alpha,
+                                                  size: 16,
+                                                  color: _currentSortOption == SortOption.nameAZ
+                                                      ? AppColors.primary
+                                                      : AppColors.textSecondary,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  'İsim (A-Z)',
+                                                  style: TextStyle(
+                                                    color: _currentSortOption == SortOption.nameAZ
+                                                        ? AppColors.primary
+                                                        : AppColors.textSecondary,
+                                                    fontWeight: _currentSortOption == SortOption.nameAZ
+                                                        ? FontWeight.w600
+                                                        : FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: SortOption.nameZA,
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.sort_by_alpha,
+                                                  size: 16,
+                                                  color: _currentSortOption == SortOption.nameZA
+                                                      ? AppColors.primary
+                                                      : AppColors.textSecondary,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  'İsim (Z-A)',
+                                                  style: TextStyle(
+                                                    color: _currentSortOption == SortOption.nameZA
+                                                        ? AppColors.primary
+                                                        : AppColors.textSecondary,
+                                                    fontWeight: _currentSortOption == SortOption.nameZA
+                                                        ? FontWeight.w600
+                                                        : FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: SortOption.priceLowHigh,
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.attach_money,
+                                                  size: 16,
+                                                  color: _currentSortOption == SortOption.priceLowHigh
+                                                      ? AppColors.primary
+                                                      : AppColors.textSecondary,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  'Fiyat (Düşük-Yüksek)',
+                                                  style: TextStyle(
+                                                    color: _currentSortOption == SortOption.priceLowHigh
+                                                        ? AppColors.primary
+                                                        : AppColors.textSecondary,
+                                                    fontWeight: _currentSortOption == SortOption.priceLowHigh
+                                                        ? FontWeight.w600
+                                                        : FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: SortOption.priceHighLow,
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.attach_money,
+                                                  size: 16,
+                                                  color: _currentSortOption == SortOption.priceHighLow
+                                                      ? AppColors.primary
+                                                      : AppColors.textSecondary,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  'Fiyat (Yüksek-Düşük)',
+                                                  style: TextStyle(
+                                                    color: _currentSortOption == SortOption.priceHighLow
+                                                        ? AppColors.primary
+                                                        : AppColors.textSecondary,
+                                                    fontWeight: _currentSortOption == SortOption.priceHighLow
+                                                        ? FontWeight.w600
+                                                        : FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.surface,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: AppColors.border),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.sort, size: 16, color: AppColors.textSecondary),
+                                              const SizedBox(width: 8),
+                                              const Text(
+                                                'Sırala',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColors.textSecondary,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Icon(Icons.arrow_drop_down, size: 16, color: AppColors.textSecondary),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    SizedBox(
+                                      height: 40,
+                                      width: 120,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          if (isFilterOpen) {
+                                            _closeFilter();
+                                          } else {
+                                            _openFilter();
+                                          }
+                                        },
+                                        icon: Icon(
+                                          Icons.filter_list,
+                                          size: 16,
+                                          color: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
+                                        ),
+                                        label: Text(
+                                          'Filtrele',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
+                                          ),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: _isFilterPanelVisible ? AppColors.primary : AppColors.surface,
+                                          foregroundColor: _isFilterPanelVisible ? AppColors.surface : AppColors.textSecondary,
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                          elevation: _isFilterPanelVisible ? 2 : 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                            side: BorderSide(
+                                              color: _isFilterPanelVisible ? AppColors.primary : AppColors.border,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
                       ),
                     ),
                     
                     // Products Grid
                     SliverPadding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(isMobile ? 4.0 : 8.0),
                       sliver: SliverGrid(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 5,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 0.85,
+                          crossAxisCount: isMobile ? 2 : (isTablet ? 3 : 5),
+                          crossAxisSpacing: isMobile ? 4 : 8,
+                          mainAxisSpacing: isMobile ? 4 : 8,
+                          childAspectRatio: isMobile ? 0.75 : 0.85,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
@@ -1369,7 +1736,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
               top: 0,
               bottom: 0,
               child: Container(
-                width: 320,
+                width: isMobile ? double.infinity : 320,
                 height: double.infinity,
                 child: FilterPanel(
                   selectedProductTypes: _selectedProductTypes,

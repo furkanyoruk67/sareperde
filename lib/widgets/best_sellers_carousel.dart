@@ -10,11 +10,13 @@ import '../providers/favorites_provider.dart';
 class BestSellersCarousel extends StatefulWidget {
   final double height;
   final double width;
+  final Function(Product)? onProductInspect;
 
   const BestSellersCarousel({
     super.key,
     this.height = 300,
     this.width = 400,
+    this.onProductInspect,
   });
 
   @override
@@ -32,6 +34,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
   bool _isHovering = false;
   bool _isUserScrolling = false;
   late List<Product> _byHalitProducts;
+  int? _hoveredProductIndex;
 
   @override
   void initState() {
@@ -162,47 +165,50 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
       width: widget.width,
       height: widget.height,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.surface,
-            AppColors.surfaceVariant,
-          ],
-        ),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppColors.shadow.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
           Container(
-            padding: EdgeInsets.all(isMobile ? 12 : 16),
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 12 : 16, 
+              vertical: isMobile ? 8 : 12
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
             child: Row(
               children: [
                 Icon(
                   Icons.star,
-                  color: AppColors.primary,
-                  size: isMobile ? 16 : 20,
+                  color: AppColors.surface,
+                  size: isMobile ? 16 : 18,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'En Çok Satanlar - By Halit Collection',
-                    style: TextStyle(
-                      fontSize: isMobile ? 14 : 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
+                SizedBox(width: isMobile ? 6 : 8),
+                Text(
+                  'ÇOK SATANLAR',
+                  style: TextStyle(
+                    fontSize: isMobile ? 12 : 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.surface,
                   ),
                 ),
+                SizedBox(width: isMobile ? 6 : 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -267,32 +273,85 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                         borderRadius: const BorderRadius.vertical(
                                           top: Radius.circular(12),
                                         ),
-                                        child: Container(
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                                AppColors.surfaceVariant,
-                                                AppColors.surface,
-                                              ],
-                                            ),
-                                          ),
-                                          child: Image.asset(
-                                            product.image,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Container(
-                                                color: AppColors.surfaceVariant,
-                                                child: Icon(
-                                                  Icons.image_not_supported,
-                                                  color: AppColors.textSecondary,
-                                                  size: 40,
+                                        child: Stack(
+                                          children: [
+                                            Container(
+                                              width: double.infinity,
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                    AppColors.surfaceVariant,
+                                                    AppColors.surface,
+                                                  ],
                                                 ),
-                                              );
-                                            },
-                                          ),
+                                              ),
+                                              child: Image.asset(
+                                                product.image,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) {
+                                                  return Container(
+                                                    color: AppColors.surfaceVariant,
+                                                    child: Icon(
+                                                      Icons.image_not_supported,
+                                                      color: AppColors.textSecondary,
+                                                      size: 40,
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            // Hover overlay with inspect button
+                                            Positioned.fill(
+                                              child: MouseRegion(
+                                                onEnter: (_) => setState(() => _hoveredProductIndex = index),
+                                                onExit: (_) => setState(() => _hoveredProductIndex = null),
+                                                child: AnimatedOpacity(
+                                                  opacity: _hoveredProductIndex == index ? 1.0 : 0.0,
+                                                  duration: const Duration(milliseconds: 200),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.primary.withOpacity(0.3),
+                                                    ),
+                                                    child: Center(
+                                                                                                              child: ElevatedButton.icon(
+                                                          onPressed: () {
+                                                            if (widget.onProductInspect != null) {
+                                                              widget.onProductInspect!(product);
+                                                            }
+                                                          },
+                                                        icon: Icon(
+                                                          Icons.visibility,
+                                                          size: isMobile ? 12 : 14,
+                                                          color: Colors.white,
+                                                        ),
+                                                        label: Text(
+                                                          'İncele',
+                                                          style: TextStyle(
+                                                            fontSize: isMobile ? 8 : 10,
+                                                            fontWeight: FontWeight.w600,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        style: ElevatedButton.styleFrom(
+                                                          backgroundColor: AppColors.primary,
+                                                          foregroundColor: Colors.white,
+                                                          padding: EdgeInsets.symmetric(
+                                                            horizontal: isMobile ? 8 : 10,
+                                                            vertical: isMobile ? 4 : 6,
+                                                          ),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(isMobile ? 6 : 8),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
