@@ -51,21 +51,33 @@ class ProductCard extends StatelessWidget {
                 Expanded(
                   child: Stack(
                     children: [
-                      Image.asset(
-                        product.image,
-                        fit: BoxFit.cover,
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                          child: Image.asset(
+                            product.image,
+                            fit: BoxFit.cover,
+                            alignment: Alignment.center,
+                          ),
+                        ),
                       ),
                       // Hover overlay with inspect button
                       if (isHovered)
                         Positioned.fill(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.3),
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(16),
-                                topRight: Radius.circular(16),
-                              ),
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
                             ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.3),
+                              ),
                             child: Center(
                               child: ElevatedButton.icon(
                                 onPressed: onInspect,
@@ -95,8 +107,9 @@ class ProductCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
+                          ),    
                         ),
+                      ),
                     ],
                   ),
                 ),

@@ -141,7 +141,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
   double _getItemWidth() {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
-    return isMobile ? 148.0 : 172.0;
+    return isMobile ? 160.0 : 220.0; // Mobil için kart genişliğini daha da azalttık, daha uzun yapmak için
   }
 
   void _onHoverEnter() {
@@ -186,7 +186,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
               vertical: isMobile ? 8 : 12
             ),
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: AppColors.primaryLight,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -254,10 +254,12 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                         final product = _bestSellingProducts[index];
                         return Consumer<FavoritesProvider>(
                           builder: (context, favoritesProvider, child) {
-                            return Container(
-                              width: isMobile ? 140 : 160,
-                              margin: EdgeInsets.only(right: isMobile ? 8 : 12),
-                              child: Card(
+                                                        return Container(
+                              width: isMobile ? 160 : 160, // Mobil için kart genişliğini daha da azalttık, daha uzun yapmak için
+                              margin: EdgeInsets.only(right: isMobile ? 12 : 12),
+                              child: AspectRatio(
+                                aspectRatio: isMobile ? 0.5 : 0.85, // Mobil için daha da uzun kartlar (daha düşük aspect ratio)
+                                child: Card(
                                 elevation: 4,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -268,7 +270,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                   children: [
                                     // Product Image
                                     Expanded(
-                                      flex: 3,
+                                      flex: isMobile ? 5 : 3, // Mobil için resim alanını daha da artırdık
                                       child: ClipRRect(
                                         borderRadius: const BorderRadius.vertical(
                                           top: Radius.circular(12),
@@ -323,13 +325,13 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                                           },
                                                         icon: Icon(
                                                           Icons.visibility,
-                                                          size: isMobile ? 12 : 14,
+                                                          size: isMobile ? 14 : 14, // Mobil için ikon boyutunu artırdık
                                                           color: Colors.white,
                                                         ),
                                                         label: Text(
                                                           'İncele',
                                                           style: TextStyle(
-                                                            fontSize: isMobile ? 8 : 10,
+                                                            fontSize: isMobile ? 10 : 10, // Mobil için yazı boyutunu artırdık
                                                             fontWeight: FontWeight.w600,
                                                             color: Colors.white,
                                                           ),
@@ -338,8 +340,8 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                                           backgroundColor: AppColors.primary,
                                                           foregroundColor: Colors.white,
                                                           padding: EdgeInsets.symmetric(
-                                                            horizontal: isMobile ? 8 : 10,
-                                                            vertical: isMobile ? 4 : 6,
+                                                            horizontal: isMobile ? 10 : 10, // Mobil için padding artırdık
+                                                            vertical: isMobile ? 6 : 6, // Mobil için padding artırdık
                                                           ),
                                                           shape: RoundedRectangleBorder(
                                                             borderRadius: BorderRadius.circular(isMobile ? 6 : 8),
@@ -358,9 +360,9 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                     
                                                                          // Product Info
                                      Expanded(
-                                       flex: 1,
+                                       flex: isMobile ? 3 : 1, // Mobil için bilgi alanını daha da artırdık
                                        child: Container(
-                                         padding: const EdgeInsets.all(6),
+                                         padding: EdgeInsets.all(isMobile ? 10 : 6), // Mobil için padding artırdık
                                          child: Column(
                                            crossAxisAlignment: CrossAxisAlignment.start,
                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -369,19 +371,19 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                              Text(
                                                product.name,
                                                style: TextStyle(
-                                                 fontSize: isMobile ? 10 : 11,
+                                                 fontSize: isMobile ? 16 : 11, // Mobil için yazı boyutunu daha da artırdık
                                                  fontWeight: FontWeight.w600,
                                                  color: AppColors.textPrimary,
-                                                 height: 1.1,
+                                                 height: 1.2,
                                                ),
-                                               maxLines: 1,
+                                               maxLines: 2,
                                                overflow: TextOverflow.ellipsis,
                                              ),
                                              
                                                                                            // Favorilere Ekle Button - At the bottom
                                               SizedBox(
                                                 width: double.infinity,
-                                                height: isMobile ? 20 : 24,
+                                                height: isMobile ? 44 : 24, // Mobil için buton yüksekliğini daha da artırdık
                                                 child: ElevatedButton.icon(
                                                   onPressed: () {
                                                     favoritesProvider.toggleFavorite(product);
@@ -399,12 +401,12 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                                       ),
                                                     );
                                                   },
-                                                  icon: Icon(
-                                                    favoritesProvider.isFavorite(product)
-                                                        ? Icons.favorite
-                                                        : Icons.favorite_border,
-                                                    size: isMobile ? 8 : 10,
-                                                  ),
+                                                                                                      icon: Icon(
+                                                      favoritesProvider.isFavorite(product)
+                                                          ? Icons.favorite
+                                                          : Icons.favorite_border,
+                                                      size: isMobile ? 18 : 10, // Mobil için ikon boyutunu daha da artırdık
+                                                    ),
                                                   label: Text(
                                                     favoritesProvider.isFavorite(product)
                                                         ? 'Favorilerden Çıkar'
@@ -423,7 +425,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                                       vertical: isMobile ? 0 : 1,
                                                     ),
                                                     textStyle: TextStyle(
-                                                      fontSize: isMobile ? 6 : 7,
+                                                      fontSize: isMobile ? 12 : 7, // Mobil için yazı boyutunu daha da artırdık
                                                       fontWeight: FontWeight.w600,
                                                     ),
                                                     shape: RoundedRectangleBorder(
@@ -439,6 +441,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                   ],
                                 ),
                               ),
+                            ),
                             );
                           },
                         );

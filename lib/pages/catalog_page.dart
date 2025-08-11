@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -259,6 +260,18 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
   Product? _selectedProduct;
   bool _isModalOpen = false;
   final ScrollController _scrollController = ScrollController();
+  final PageController _pageController = PageController();
+  Timer? _sliderTimer;
+  int _currentSliderIndex = 0;
+
+  // List of slider images from the Slider folder
+  final List<String> sliderImages = [
+    'assets/Slider/Ekran görüntüsü 2025-08-11 233136.png',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 233113.png',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 232840.png',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 232819.png',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 232717.png',
+  ];
 
   bool _hasActiveFilters = false;
   String _searchQuery = '';
@@ -293,12 +306,40 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _applyFilters();
+    _startSliderTimer();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _pageController.dispose();
+    _sliderTimer?.cancel();
     super.dispose();
+  }
+
+  void _startSliderTimer() {
+    _sliderTimer?.cancel();
+    _sliderTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentSliderIndex = (_currentSliderIndex + 1) % sliderImages.length;
+        });
+        _pageController.animateToPage(
+          _currentSliderIndex,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  void _stopSliderTimer() {
+    _sliderTimer?.cancel();
+  }
+
+  void _resetSliderTimer() {
+    _stopSliderTimer();
+    _startSliderTimer();
   }
 
   void _applyFilters() {
@@ -868,14 +909,22 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                     SliverToBoxAdapter(
                       child: Container(
                         width: double.infinity,
-                        height: isMobile ? 250 : 400,
+                        height: isMobile ? 350 : 500,
                         child: PageView.builder(
-                          itemCount: 3,
+                          controller: _pageController,
+                          itemCount: sliderImages.length, // Updated to match the number of slider images
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentSliderIndex = index;
+                            });
+                            _resetSliderTimer();
+                          },
                           itemBuilder: (context, index) {
                             return Container(
                               margin: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 16, vertical: 8),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16),
+                                color: Colors.grey[100],
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.1),
@@ -893,8 +942,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                       height: double.infinity,
                                       decoration: BoxDecoration(
                                         image: DecorationImage(
-                                          image: AssetImage('assets/hero_slider.jpg'),
-                                          fit: BoxFit.cover,
+                                          image: AssetImage(sliderImages[index]),
+                                          fit: BoxFit.contain,
+                                          alignment: Alignment.center,
                                         ),
                                       ),
                                     ),
@@ -950,30 +1000,6 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                               ],
                                             ),
                                           ),
-                                          const SizedBox(height: 16),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // TODO: Implement navigation
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppColors.primary,
-                                              foregroundColor: AppColors.surface,
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: isMobile ? 16 : 24, 
-                                                vertical: isMobile ? 8 : 12
-                                              ),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              'Ürünleri Keşfet',
-                                              style: TextStyle(
-                                                fontSize: isMobile ? 12 : 16,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
                                         ],
                                       ),
                                     ),
@@ -986,7 +1012,8 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                       ),
                     ),
                     
-                                                              // Video Section with Stack for Filter Panel
+                    // Çok Satanlar Section
+                    // Video Section with Stack for Filter Panel
                      SliverToBoxAdapter(
                        child: Container(
                          width: double.infinity,
@@ -1072,9 +1099,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                    Expanded(
                                      flex: 1,
                                      child: Container(
-                                       margin: const EdgeInsets.only(top: 8),
-                                       child: BestSellersCarousel(
-                                         height: 180,
+                                       margin: const EdgeInsets.only(top: 24), // Anasayfayı daha aşağı kaydırdık
+                                                                           child: BestSellersCarousel(
+                                      height: 380, // En çok satanlar yüksekliğini daha da artırdık
                                          width: double.infinity,
                                          onProductInspect: (Product product) {
                                            _openProductModal(product);
@@ -1159,9 +1186,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                     Expanded(
                                       flex: 2,
                                       child: Container(
-                                        margin: const EdgeInsets.only(left: 8),
+                                        margin: const EdgeInsets.only(left: 8, top: 8), // Desktop için de üst margin ekledik
                                         child: BestSellersCarousel(
-                                          height: 300,
+                                          height: 380, // Desktop için de yüksekliği daha da artırdık
                                           width: double.infinity,
                                           onProductInspect: (Product product) {
                                             _openProductModal(product);
@@ -1181,6 +1208,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                     // Products Section
                     SliverToBoxAdapter(
                       child: Container(
+                        margin: EdgeInsets.only(top: isMobile ? 24 : 32), // Ürünler bölümünü daha aşağı kaydırdık
                         padding: EdgeInsets.symmetric(
                           horizontal: isMobile ? 16 : 32, 
                           vertical: isMobile ? 16 : 20
