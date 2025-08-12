@@ -63,6 +63,33 @@ class ProductCard extends StatelessWidget {
                             product.image,
                             fit: BoxFit.cover,
                             alignment: Alignment.center,
+                            errorBuilder: (context, error, stackTrace) {
+                              print('Asset yükleme hatası: ${product.image}');
+                              return Container(
+                                width: double.infinity,
+                                height: double.infinity,
+                                color: AppColors.surfaceVariant,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.image_not_supported,
+                                      color: AppColors.textSecondary,
+                                      size: 40,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Görsel yüklenemedi',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),

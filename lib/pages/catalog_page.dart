@@ -255,7 +255,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
   SortOption _currentSortOption = SortOption.nameAZ;
   bool _isFilterPanelVisible = false;
   bool isFilterOpen = false; // sayfa state'inde
-  late List<Product> _visibleProducts = List<Product>.from(ProductData.allProducts);
+  late List<Product> _visibleProducts = List<Product>.from(ProductData.homepageProducts);
   int? _hoveredProductIndex;
   Product? _selectedProduct;
   bool _isModalOpen = false;
@@ -343,7 +343,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
   }
 
   void _applyFilters() {
-    _visibleProducts = ProductData.allProducts.where((product) {
+    _visibleProducts = ProductData.homepageProducts.where((product) {
       // Arama filtresi
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
@@ -437,9 +437,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
   }
 
   int _getSearchResultsCount(String query) {
-    if (query.isEmpty) return ProductData.allProducts.length;
+    if (query.isEmpty) return ProductData.homepageProducts.length;
     
-    return ProductData.allProducts.where((product) {
+    return ProductData.homepageProducts.where((product) {
       final queryLower = query.toLowerCase();
       final productName = product.name.toLowerCase();
       final productType = product.productType.toLowerCase();
