@@ -188,17 +188,7 @@ class ProductData {
       brand: 'Stor Koleksiyonu',
       price: 1450,
     ),
-    Product(
-      name: 'Çok Satan Fon Perde 1',
-      image: 'assets/bestsellers/Ekran görüntüsü 2025-08-12 202927.png',
-      category: 'Fon Perde',
-      productType: 'Fon Perdeler',
-      size: '280',
-      quality: 'Premium Polyester',
-      color: 'Mavi',
-      brand: 'Guzzi',
-      price: 1650,
-    ),
+
     Product(
       name: 'Çok Satan Aksesuar 1',
       image: 'assets/bestsellers/Ekran görüntüsü 2025-08-12 202916.png',
