@@ -3,28 +3,27 @@ import '../models/product.dart';
 class ProductData {
   // Filter options
   static const List<String> categories = [
-    'Black-Out Perde',
-    'Hazır Perde',
-    'Çocuk Odası Perdeleri',
-    'Taç Collection Serisi',
+    'Tül',
+    'Stor',
+    'Jaluzi',
+    'Fon Perde',
+    'Aksesuar',
   ];
 
   static const List<String> productTypes = [
-    'Astar',
-    'Tül Perde',
-    'Fon Hazır Perdeler',
+    'Tül',
+    'Stor'
     'Fon Perdeler',
     'Güneşlikler',
-    'Hazır Stor Perde',
-    'Tül Hazır Perdeler',
-    'Tül Perdeler',
+    'Stor Perde',
+    'Jaluzi',
   ];
 
   static const List<String> sizes = [
     '280', '288', '290', "2'li Set", '300', '305', '310', '320', 'STANDART', 'Tek Kanat', 'Tekli'
   ];
 
-  static const List<String> qualities = ['Polyester'];
+  static const List<String> qualities = ['Polyester', 'Keten'];
 
   static const List<String> colors = [
     'Antrasit', 'Bakır', 'Bej', 'Beyaz', 'Çok Renkli', 'Ekru', 'Füme', 'Gri', 'Kahve',
@@ -32,7 +31,7 @@ class ProductData {
   ];
 
   static const List<String> brands = [
-    'Taç', 'Taç Boutique', 'Taç Collection', 'Taç Lisanslı', 'Taç Ortak', 'By Halit'
+    'Nevada', 'By Halit Collection'
   ];
 
   // ===========================================

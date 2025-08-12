@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -136,42 +137,71 @@ class _AnimatedDropdownMenuState extends State<AnimatedDropdownMenu>
               opacity: _opacityAnimation,
               child: SlideTransition(
                 position: _slideAnimation,
-                child: MouseRegion(
-                  onEnter: (_) => setState(() => _isDropdownHovered = true),
-                  onExit: (_) => setState(() => _isDropdownHovered = false),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: widget.items.map((item) {
-                        return MouseRegion(
-                          onEnter: (_) => setState(() => _hoveredItem = item),
-                          onExit: (_) => setState(() => _hoveredItem = null),
-                          child: InkWell(
-                            onTap: () {
-                              widget.onItemSelected(item);
-                              _closeDropdown();
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              child: AnimatedDefaultTextStyle(
-                                duration: const Duration(milliseconds: 150),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: _hoveredItem == item ? FontWeight.w600 : FontWeight.w500,
-                                  color: _hoveredItem == item
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary,
+                child: StatefulBuilder(
+                  builder: (context, setDropdownState) {
+                    return MouseRegion(
+                      onEnter: (_) {
+                        setState(() => _isDropdownHovered = true);
+                      },
+                      onExit: (_) {
+                        setState(() => _isDropdownHovered = false);
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (!_isHovered && mounted && !_isDropdownHovered) {
+                            _closeDropdown();
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: widget.items.map((item) {
+                            final isHovered = _hoveredItem == item;
+                            return MouseRegion(
+                              onEnter: (_) {
+                                setDropdownState(() => _hoveredItem = item);
+                              },
+                              onExit: (_) {
+                                setDropdownState(() => _hoveredItem = null);
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: isHovered 
+                                    ? AppColors.primary.withOpacity(0.12)
+                                    : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: Text(item),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(6),
+                                  onTap: () {
+                                    widget.onItemSelected(item);
+                                    _closeDropdown();
+                                  },
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    child: AnimatedDefaultTextStyle(
+                                      duration: const Duration(milliseconds: 150),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
+                                        color: isHovered
+                                            ? AppColors.primary
+                                            : AppColors.textPrimary,
+                                      ),
+                                      child: Text(item),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -263,6 +293,16 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
   final PageController _pageController = PageController();
   Timer? _sliderTimer;
   int _currentSliderIndex = 0;
+  
+  // Expandable menü için state'ler
+  final Set<String> _expandedCategories = {};
+  bool _isMobileMenuOpen = false;
+  OverlayEntry? _mobileMenuOverlayEntry;
+  
+  // Pagination için state'ler
+  int _currentPageSize = 20;
+  final int _pageIncrement = 20;
+  bool _isLoadingMore = false;
 
   // List of slider images from the Slider folder
   final List<String> sliderImages = [
@@ -292,6 +332,248 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
     );
   }
 
+  void _toggleCategory(String category) {
+    setState(() {
+      if (_expandedCategories.contains(category)) {
+        _expandedCategories.remove(category);
+      } else {
+        _expandedCategories.add(category);
+      }
+    });
+  }
+
+  void _openMobileMenu() {
+    if (_isMobileMenuOpen) return;
+    
+    _mobileMenuOverlayEntry = _createMobileMenuOverlay();
+    Overlay.of(context).insert(_mobileMenuOverlayEntry!);
+    setState(() {
+      _isMobileMenuOpen = true;
+    });
+  }
+
+  void _closeMobileMenu() {
+    if (!_isMobileMenuOpen) return;
+    
+    _mobileMenuOverlayEntry?.remove();
+    _mobileMenuOverlayEntry = null;
+    setState(() {
+      _isMobileMenuOpen = false;
+      _expandedCategories.clear(); // Tüm kategorileri kapat
+    });
+  }
+
+  void _updateMobileMenu() {
+    if (!_isMobileMenuOpen) return;
+    
+    _mobileMenuOverlayEntry?.remove();
+    _mobileMenuOverlayEntry = _createMobileMenuOverlay();
+    Overlay.of(context).insert(_mobileMenuOverlayEntry!);
+  }
+
+  OverlayEntry _createMobileMenuOverlay() {
+    return OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: _closeMobileMenu,
+        child: Container(
+          color: Colors.black.withOpacity(0.5),
+          child: SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: GestureDetector(
+                onTap: () {}, // Menüye tıklamayı engelle
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    margin: EdgeInsets.only(top: 60, right: 16, left: 16),
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Header
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(12),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Kategoriler',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: _closeMobileMenu,
+                                icon: Icon(Icons.close, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Menu Items
+                        Flexible(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: _buildMobileMenuItems(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildMobileMenuItems() {
+    List<Widget> menuItems = [];
+    
+    // Anasayfa
+    menuItems.add(_buildMenuItem('Anasayfa', () {
+      _closeMobileMenu();
+      // Anasayfa navigation
+    }));
+    
+    // Kategoriler ve alt kategorileri
+    final categories = {
+      'tul': {'title': 'TÜL', 'items': ['Bambu', 'Keten', 'Krep', 'File']},
+      'stor': {'title': 'STOR PERDE', 'items': ['Keten', 'Panama', 'Mat', 'Güneşlik', 'Lazer Kesim', 'Simli']},
+      'fon': {'title': 'FON PERDE', 'items': ['Dokuma', 'Keten Doku', 'Saten', 'Örme']},
+      'jaluzi': {'title': 'JALUZİ', 'items': ['Plastik', 'Kumaş', 'Alüminyum', 'Ahşap']},
+      'plise': {'title': 'PLİSE', 'items': ['Black-out', 'Keten', 'Honeycamp']},
+      'aksesuar': {'title': 'AKSESUAR', 'items': ['Rustik', 'Broçal', 'Püskül', 'Korniş', 'Sarkıt', 'Elçek', 'Bordür']},
+    };
+
+    categories.forEach((key, categoryData) {
+      final title = categoryData['title'] as String;
+      final subItems = categoryData['items'] as List<String>;
+      final isExpanded = _expandedCategories.contains(key);
+      
+      // Ana kategori başlığı
+      menuItems.add(_buildCategoryHeader(title, isExpanded, () {
+        _toggleCategory(key);
+        _updateMobileMenu(); // Menüyü yeniden oluştur
+      }));
+      
+      // Alt kategoriler (sadece açıksa göster)
+      if (isExpanded) {
+        for (String item in subItems) {
+          menuItems.add(_buildSubMenuItem(item, () {
+            _closeMobileMenu();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('$item yakında kullanılabilir olacak!'),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }));
+        }
+      }
+    });
+    
+    return menuItems;
+  }
+
+  Widget _buildMenuItem(String title, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryHeader(String title, bool isExpanded, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              Icon(
+                isExpanded ? Icons.expand_less : Icons.expand_more,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubMenuItem(String title, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(left: 32, right: 16, top: 12, bottom: 12),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   int get _activeFilterCount {
     int count = 0;
     if (_selectedProductTypes.isNotEmpty) count++;
@@ -314,6 +596,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
     _scrollController.dispose();
     _pageController.dispose();
     _sliderTimer?.cancel();
+    _mobileMenuOverlayEntry?.remove();
     super.dispose();
   }
 
@@ -394,6 +677,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
     }).toList();
     
     _applySorting();
+    _resetPagination(); // Reset pagination when filters change
   }
 
   void _applySorting() {
@@ -617,6 +901,28 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
     });
   }
 
+  void _loadMoreProducts() {
+    setState(() {
+      _isLoadingMore = true;
+    });
+    
+    // Simulate loading delay for UX
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _currentPageSize += _pageIncrement;
+          _isLoadingMore = false;
+        });
+      }
+    });
+  }
+
+  void _resetPagination() {
+    setState(() {
+      _currentPageSize = 20;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -626,8 +932,28 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: isMobile ? AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
+        backgroundColor: Colors.white.withOpacity(0.95),
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.1),
+        surfaceTintColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withOpacity(0.98),
+                Colors.grey.shade50.withOpacity(0.95),
+              ],
+            ),
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.primary.withOpacity(0.15),
+                width: 1,
+              ),
+            ),
+          ),
+        ),
         title: Row(
           children: [
             Container(
@@ -704,37 +1030,9 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
               );
             },
           ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'home':
-                  // Anasayfa navigation
-                  break;
-                case 'tul':
-                case 'stor':
-                case 'fon':
-                case 'jaluzi':
-                case 'plise':
-                case 'aksesuar':
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$value kategorisi yakında kullanılabilir olacak!'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(value: 'home', child: Text('Anasayfa')),
-              PopupMenuItem(value: 'tul', child: Text('Tül')),
-              PopupMenuItem(value: 'stor', child: Text('Stor Perde')),
-              PopupMenuItem(value: 'fon', child: Text('Fon Perde')),
-              PopupMenuItem(value: 'jaluzi', child: Text('Jaluzi')),
-              PopupMenuItem(value: 'plise', child: Text('Plise')),
-              PopupMenuItem(value: 'aksesuar', child: Text('Aksesuar')),
-            ],
-            child: Icon(Icons.menu, color: AppColors.textSecondary),
+          IconButton(
+            onPressed: _openMobileMenu,
+            icon: Icon(Icons.menu, color: AppColors.textSecondary),
           ),
         ],
       ) : null,
@@ -746,7 +1044,29 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
               // Desktop Navbar
               if (!isMobile)
                 Container(
-                  color: AppColors.surface,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withOpacity(0.98),
+                        Colors.grey.shade50.withOpacity(0.96),
+                      ],
+                    ),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: AppColors.primary.withOpacity(0.12),
+                        width: 1,
+                      ),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -1719,10 +2039,62 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                               },
                             );
                           },
-                          childCount: _visibleProducts.length,
+                          childCount: math.min(_currentPageSize, _visibleProducts.length),
                         ),
                       ),
                     ),
+                    
+                    // Load More Button
+                    if (_currentPageSize < _visibleProducts.length)
+                      SliverToBoxAdapter(
+                        child: Container(
+                          padding: EdgeInsets.all(24),
+                          child: Center(
+                            child: _isLoadingMore
+                                ? Column(
+                                    children: [
+                                      CircularProgressIndicator(
+                                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                      ),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        'Ürünler yükleniyor...',
+                                        style: TextStyle(
+                                          color: AppColors.textSecondary,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : ElevatedButton(
+                                    onPressed: _loadMoreProducts,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      elevation: 2,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.expand_more, size: 20),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Daha Fazla Göster',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
                     
                     // Footer
                     SliverToBoxAdapter(
