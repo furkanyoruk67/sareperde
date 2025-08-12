@@ -64,79 +64,104 @@ class ProductModal extends StatelessWidget {
                   ],
                 ),
                 child: SafeArea(
-                  child: Column(
+                  child: Stack(
                     children: [
-                      // Header with close button
-                      Container(
-                        padding: EdgeInsets.all(isMobile ? 16 : 20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: isMobile ? BorderRadius.zero : const BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            topRight: Radius.circular(16),
+                      // Centered image
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.all(24),
+                          child: InteractiveViewer(
+                            minScale: 0.5,
+                            maxScale: 4.0,
+                            child: Container(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                maxHeight: MediaQuery.of(context).size.height * 0.8,
+                              ),
+                              child: Image.asset(
+                                selectedProduct!.image,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 300,
+                                    height: 300,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.broken_image,
+                                          size: 64,
+                                          color: Colors.grey[400],
+                                        ),
+                                        SizedBox(height: 16),
+                                        Text(
+                                          'Görsel yüklenemedi',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Ürün Detayı',
-                                style: TextStyle(
-                                  fontSize: isMobile ? 18 : 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: onClose,
-                              icon: const Icon(Icons.close),
-                              style: IconButton.styleFrom(
-                                backgroundColor: Colors.grey[100],
-                                shape: const CircleBorder(),
-                              ),
-                            ),
-                          ],
+                      ),
+                      // Close button
+                      Positioned(
+                        top: 16,
+                        right: 16,
+                        child: IconButton(
+                          onPressed: onClose,
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black.withOpacity(0.6),
+                            shape: const CircleBorder(),
+                            padding: EdgeInsets.all(12),
+                          ),
                         ),
                       ),
-                      // Content
-                      Expanded(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            // Responsive layout: side-by-side on large screens, stacked on small screens
-                            if (constraints.maxWidth > 800 && !isMobile) {
-                              return Row(
-                                children: [
-                                  // Left side - Image with zoom
-                                  Expanded(
-                                    flex: 1,
-                                    child: _buildZoomableImage(context),
-                                  ),
-                                  // Right side - Product details
-                                  Expanded(
-                                    flex: 1,
-                                    child: _buildProductDetails(context),
-                                  ),
-                                ],
-                              );
-                            } else {
-                              return Column(
-                                children: [
-                                  // Top - Image with zoom
-                                  Expanded(
-                                    flex: 1,
-                                    child: _buildZoomableImage(context),
-                                  ),
-                                  // Bottom - Product details
-                                  Expanded(
-                                    flex: 1,
-                                    child: _buildProductDetails(context),
-                                  ),
-                                ],
-                              );
-                            }
-                          },
+                      // Zoom hint at bottom
+                      Positioned(
+                        bottom: 32,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.zoom_in, color: Colors.white, size: 16),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Yakınlaştırmak için kaydırın',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -151,6 +176,8 @@ class ProductModal extends StatelessWidget {
     );
   }
 
+  // Commented out methods - not needed for simplified modal
+  /*
   Widget _buildZoomableImage(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
@@ -299,27 +326,7 @@ class ProductModal extends StatelessWidget {
                 SizedBox(width: isMobile ? 8 : 12),
                 Expanded(
                   flex: 2,
-                  child: /* Consumer<CartProvider>(
-                    builder: (context, cartProvider, child) {
-                      final isInCart = selectedProduct != null && cartProvider.isInCart(selectedProduct!);
-                      final quantity = selectedProduct != null ? cartProvider.getQuantity(selectedProduct!) : 0;
-                      
-                      return ElevatedButton.icon(
-                        onPressed: onAddToCart,
-                        icon: Icon(isInCart ? Icons.check : Icons.shopping_cart),
-                        label: Text(isInCart ? 'Sepette (${quantity})' : 'Sepete Ekle'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: isInCart ? AppColors.success : AppColors.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      );
-                    },
-                  ), */
-                  Container(), // Placeholder for commented out Add to Cart button
+                  child: Container(), // Placeholder for commented out Add to Cart button
                 ),
               ],
             ),
@@ -371,4 +378,5 @@ class ProductModal extends StatelessWidget {
       ),
     );
   }
+  */
 }
