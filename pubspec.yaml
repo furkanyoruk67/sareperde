@@ -87,6 +87,9 @@ flutter:
     # Extracted Pages katalog görselleri - recursive
     - assets/extracted_pages/ByHalitCollection2022sweb/
     - assets/extracted_pages/ByHalitCollectionAksesuarKatalog/
+    - assets/extracted_pages/Stor_Katalogu/
+    - assets/extracted_pages/Guzzi_Brosur/
+    - assets/extracted_pages/Basic_Collection/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

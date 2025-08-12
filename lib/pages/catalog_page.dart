@@ -2089,6 +2089,23 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
+                                        SizedBox(width: 16),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(16),
+                                            border: Border.all(color: AppColors.primary),
+                                          ),
+                                          child: Text(
+                                            '${_currentPageSize}/${_visibleProducts.length}',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),

@@ -61,7 +61,7 @@ class ProductCard extends StatelessWidget {
                           ),
                           child: Image.asset(
                             product.image,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                             alignment: Alignment.center,
                             errorBuilder: (context, error, stackTrace) {
                               print('Asset yükleme hatası: ${product.image}');
