@@ -3,10 +3,14 @@ import 'product.dart';
 class CartItem {
   final Product product;
   int quantity;
+  final double? width;
+  final double? height;
 
   CartItem({
     required this.product,
     this.quantity = 1,
+    this.width,
+    this.height,
   });
 
   double get totalPrice => product.price * quantity;
@@ -14,10 +18,14 @@ class CartItem {
   CartItem copyWith({
     Product? product,
     int? quantity,
+    double? width,
+    double? height,
   }) {
     return CartItem(
       product: product ?? this.product,
       quantity: quantity ?? this.quantity,
+      width: width ?? this.width,
+      height: height ?? this.height,
     );
   }
 

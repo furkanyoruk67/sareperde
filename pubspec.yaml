@@ -37,6 +37,18 @@ dependencies:
   
   # State management
   provider: ^6.1.1
+  
+  # URL launcher for external links
+  url_launcher: ^6.2.5
+  
+  # Video player for video content
+  video_player: ^2.8.3
+  youtube_player_iframe: ^5.2.2
+  
+  # Google Fonts for custom typography
+  google_fonts: ^6.1.0
+  
+  # YouTube player for web - removed due to compatibility issues
 
 dev_dependencies:
   flutter_test:
@@ -63,9 +75,21 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/logo1.jpg
+    - assets/hero_slider.jpg
     - assets/products/perde1.png
     - assets/products/perde2.png
     - assets/products/perde3.png
+    - assets/videos/tanitim.mp4
+    # Çok satanlar görselleri (elle eklenecek)
+    - assets/bestsellers/
+    # Slider images
+    - assets/Slider/
+    # Extracted Pages katalog görselleri - recursive
+    - assets/extracted_pages/ByHalitCollection2022sweb/
+    - assets/extracted_pages/ByHalitCollectionAksesuarKatalog/
+    - assets/extracted_pages/Stor_Katalogu/
+    - assets/extracted_pages/Guzzi_Brosur/
+    - assets/extracted_pages/Basic_Collection/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

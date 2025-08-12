@@ -3,7 +3,6 @@ import '../constants/app_colors.dart';
 import '../data/product_data.dart';
 
 class FilterPanel extends StatelessWidget {
-  final Set<String> selectedCategories;
   final Set<String> selectedProductTypes;
   final Set<String> selectedSizes;
   final Set<String> selectedQualities;
@@ -11,17 +10,17 @@ class FilterPanel extends StatelessWidget {
   final Set<String> selectedBrands;
   final RangeValues priceRange;
   final Function(RangeValues) onPriceRangeChanged;
-  final Function(String, bool) onCategoryChanged;
   final Function(String, bool) onProductTypeChanged;
   final Function(String, bool) onSizeChanged;
   final Function(String, bool) onQualityChanged;
   final Function(String, bool) onColorChanged;
   final Function(String, bool) onBrandChanged;
   final VoidCallback onApplyFilters;
+  final VoidCallback? onClose;
+  final VoidCallback? onResetFilters;
 
   const FilterPanel({
     Key? key,
-    required this.selectedCategories,
     required this.selectedProductTypes,
     required this.selectedSizes,
     required this.selectedQualities,
@@ -29,123 +28,199 @@ class FilterPanel extends StatelessWidget {
     required this.selectedBrands,
     required this.priceRange,
     required this.onPriceRangeChanged,
-    required this.onCategoryChanged,
     required this.onProductTypeChanged,
     required this.onSizeChanged,
     required this.onQualityChanged,
     required this.onColorChanged,
     required this.onBrandChanged,
     required this.onApplyFilters,
+    this.onClose,
+    this.onResetFilters,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 320,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          right: BorderSide(color: AppColors.border, width: 1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(2, 0),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768;
+    
+    return Material(
+      elevation: isMobile ? 0 : 8,
+      color: Colors.transparent,
+      child: Container(
+        width: isMobile ? double.infinity : 280,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border(
+            left: BorderSide(color: AppColors.border, width: 1),
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            // Panel başlığı
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.filter_alt,
-                    color: AppColors.surface,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'PERDE FİLTRELERİ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.surface,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
+          boxShadow: isMobile ? [] : [
+            BoxShadow(
+              color: AppColors.shadow,
+              blurRadius: 16,
+              spreadRadius: 4,
+              offset: const Offset(-4, 0),
             ),
-            const SizedBox(height: 12),
-
-            // Kaydırılabilir filtre alanı
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Column(
-                  children: [
-                    _buildFilterCard('Kategori', ProductData.categories, selectedCategories, onCategoryChanged),
-                    _buildFilterCard('Ürün Tipi', ProductData.productTypes, selectedProductTypes, onProductTypeChanged),
-                    _buildFilterCard('Ebat', ProductData.sizes, selectedSizes, onSizeChanged),
-                    _buildFilterCard('Kalite', ProductData.qualities, selectedQualities, onQualityChanged),
-                    _buildFilterCard('Renk', ProductData.colors, selectedColors, onColorChanged),
-                    _buildFilterCard('Marka', ProductData.brands, selectedBrands, onBrandChanged),
-                    _buildPriceCard(),
-                    const SizedBox(height: 80), // butondan ayrışsın
-                  ],
-                ),
-              ),
-            ),
-
-            // Kaydırılamayan sabit "Filtrele" butonu
-            SafeArea(
-              top: false,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                child: ElevatedButton.icon(
-                  onPressed: onApplyFilters,
-                  icon: const Icon(Icons.filter_alt, size: 20),
-                  label: const Text(
-                    'Filtrele',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                    shadowColor: AppColors.primary.withOpacity(0.3),
-                  ),
-                ),
-              ),
+            BoxShadow(
+              color: AppColors.shadow.withOpacity(0.3),
+              blurRadius: 24,
+              spreadRadius: 8,
+              offset: const Offset(-8, 0),
             ),
           ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(isMobile ? 8 : 8),
+            child: Column(
+              children: [
+                // Panel başlığı
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 12 : 16, 
+                    vertical: isMobile ? 8 : 12
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.filter_alt,
+                        color: AppColors.surface,
+                        size: isMobile ? 16 : 18,
+                      ),
+                      SizedBox(width: isMobile ? 6 : 8),
+                      Expanded(
+                        child: Text(
+                          'FİLTRELER',
+                          style: TextStyle(
+                            fontSize: isMobile ? 12 : 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.surface,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      if (onClose != null)
+                        IconButton(
+                          onPressed: onClose,
+                          icon: const Icon(
+                            Icons.close,
+                            color: AppColors.surface,
+                            size: 20,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppColors.surface.withOpacity(0.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Kaydırılabilir filtre alanı
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Column(
+                      children: [
+                                              _buildFilterCard('Ürün Tipi', ProductData.productTypes, selectedProductTypes, onProductTypeChanged),
+                      _buildFilterCard('Ebat', ProductData.sizes, selectedSizes, onSizeChanged),
+                      _buildFilterCard('Kalite', ProductData.qualities, selectedQualities, onQualityChanged),
+                      _buildFilterCard('Renk', ProductData.colors, selectedColors, onColorChanged),
+                      _buildFilterCard('Marka', ProductData.brands, selectedBrands, onBrandChanged),
+                      // _buildPriceCard(), // Fiyat filtresi kapatıldı
+                        const SizedBox(height: 60), // butondan ayrışsın
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Kaydırılamayan sabit butonlar
+                SafeArea(
+                  top: false,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        // Filtrele butonu
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: onApplyFilters,
+                            icon: const Icon(Icons.filter_alt, size: 18),
+                            label: const Text(
+                              'Filtrele',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.surface,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                              shadowColor: AppColors.primary.withOpacity(0.3),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Filtreyi Sıfırla butonu
+                        if (onResetFilters != null)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: onResetFilters,
+                              icon: const Icon(Icons.refresh, size: 18),
+                              label: const Text(
+                                'Filtreyi Sıfırla',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.surface,
+                                foregroundColor: AppColors.textSecondary,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: AppColors.border),
+                                ),
+                                elevation: 0,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -154,28 +229,28 @@ class FilterPanel extends StatelessWidget {
   Widget _buildFilterCard(String title, List<String> items, Set<String> selection, Function(String, bool) onChanged) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: ExpansionTile(
-        initiallyExpanded: true,
-        tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        initiallyExpanded: false,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        childrenPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         title: Text(
           title,
           style: const TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 16,
+            fontSize: 14,
             color: AppColors.textPrimary,
           ),
         ),
@@ -184,7 +259,7 @@ class FilterPanel extends StatelessWidget {
           return CheckboxListTile(
             dense: true,
             controlAffinity: ListTileControlAffinity.leading,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             value: checked,
             onChanged: (val) {
               onChanged(e, val == true);
@@ -192,7 +267,7 @@ class FilterPanel extends StatelessWidget {
             title: Text(
               e,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
@@ -208,29 +283,29 @@ class FilterPanel extends StatelessWidget {
   Widget _buildPriceCard() {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: ExpansionTile(
-        initiallyExpanded: true,
-        tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        initiallyExpanded: false,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: const Text(
           'Fiyat',
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 16,
+            fontSize: 14,
             color: AppColors.textPrimary,
           ),
         ),
@@ -254,7 +329,7 @@ class FilterPanel extends StatelessWidget {
               Text(
                 'Min: ${priceRange.start.toStringAsFixed(0)} ₺',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                 ),
@@ -262,14 +337,14 @@ class FilterPanel extends StatelessWidget {
               Text(
                 'Max: ${priceRange.end.toStringAsFixed(0)} ₺',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
         ],
       ),
     );

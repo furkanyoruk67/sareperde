@@ -4,6 +4,8 @@ import '../constants/app_colors.dart';
 import '../models/cart_item.dart';
 import '../providers/cart_provider.dart';
 
+import '../widgets/edit_dimension_dialog.dart';
+
 class CartPage extends StatefulWidget {
   const CartPage({Key? key}) : super(key: key);
 
@@ -149,7 +151,7 @@ class _CartPageState extends State<CartPage> {
               separatorBuilder: (context, index) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
                 final cartItem = cartProvider.items[index];
-                return _buildCartItemRow(context, cartItem, cartProvider);
+                return _buildCartItemRow(context, cartItem, cartProvider, index);
               },
             ),
           ),
@@ -158,7 +160,7 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  Widget _buildCartItemRow(BuildContext context, CartItem cartItem, CartProvider cartProvider) {
+  Widget _buildCartItemRow(BuildContext context, CartItem cartItem, CartProvider cartProvider, int itemIndex) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -218,6 +220,27 @@ class _CartPageState extends State<CartPage> {
                           fontSize: 14,
                         ),
                       ),
+                      if (cartItem.width != null && cartItem.height != null) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.straighten,
+                              size: 14,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${cartItem.width!.toStringAsFixed(0)} x ${cartItem.height!.toStringAsFixed(0)} cm',
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -241,8 +264,8 @@ class _CartPageState extends State<CartPage> {
                               children: [
                                 IconButton(
                                   onPressed: () {
-                                    cartProvider.updateQuantity(
-                                      cartItem.product,
+                                    cartProvider.updateQuantityAtIndex(
+                                      itemIndex,
                                       cartItem.quantity - 1,
                                     );
                                   },
@@ -265,8 +288,8 @@ class _CartPageState extends State<CartPage> {
                                 ),
                                 IconButton(
                                   onPressed: () {
-                                    cartProvider.updateQuantity(
-                                      cartItem.product,
+                                    cartProvider.updateQuantityAtIndex(
+                                      itemIndex,
                                       cartItem.quantity + 1,
                                     );
                                   },
@@ -322,28 +345,26 @@ class _CartPageState extends State<CartPage> {
             ),
             child: Row(
               children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Edit functionality - could open a modal or navigate to product page
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Düzenleme özelliği yakında')),
-                    );
-                  },
-                  icon: const Icon(Icons.edit, size: 16),
-                  label: const Text('Düzenle'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    foregroundColor: AppColors.surface,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                if (cartItem.width != null && cartItem.height != null)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      _showEditDimensionDialog(context, cartItem, cartProvider, itemIndex);
+                    },
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text('Düzenle'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      foregroundColor: AppColors.surface,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
-                ),
                 const Spacer(),
                 TextButton(
                   onPressed: () {
-                    cartProvider.removeItem(cartItem.product);
+                    cartProvider.removeItemAtIndex(itemIndex);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${cartItem.product.name} sepetten kaldırıldı'),
@@ -443,15 +464,50 @@ class _CartPageState extends State<CartPage> {
           const Divider(height: 24),
           _buildSummaryRow('Toplam', total, isTotal: true),
           const SizedBox(height: 20),
+          // Warning for missing dimensions
+          if (!cartProvider.allItemsHaveDimensions) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.error.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: AppColors.error,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Bazı ürünler için boyut bilgisi eksik. Lütfen tüm ürünlerin boyutlarını belirtin.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.error,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 20),
           // Confirm Cart Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                _showConfirmDialog(context, cartProvider);
-              },
+              onPressed: cartProvider.allItemsHaveDimensions
+                  ? () => _showConfirmDialog(context, cartProvider)
+                  : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
+                backgroundColor: cartProvider.allItemsHaveDimensions 
+                    ? AppColors.error 
+                    : AppColors.textSecondary,
                 foregroundColor: AppColors.surface,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -459,9 +515,11 @@ class _CartPageState extends State<CartPage> {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
-                'Sepeti Onayla',
-                style: TextStyle(
+              child: Text(
+                cartProvider.allItemsHaveDimensions 
+                    ? 'Sepeti Onayla'
+                    : 'Boyutları Belirtin',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -736,5 +794,49 @@ class _CartPageState extends State<CartPage> {
         ],
       ),
     );
+  }
+
+  void _showEditDimensionDialog(BuildContext context, CartItem cartItem, CartProvider cartProvider, int itemIndex) {
+    // Only show edit dialog if the item has dimensions
+    if (cartItem.width == null || cartItem.height == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bu ürün için boyut bilgisi bulunamadı. Lütfen önce boyutları belirtin.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => EditDimensionDialog(
+        product: cartItem.product,
+        currentWidth: cartItem.width!,
+        currentHeight: cartItem.height!,
+        onUpdateDimensions: () {
+          // This callback will be called when dimensions are updated
+        },
+      ),
+    ).then((result) {
+      if (result != null && result is Map<String, dynamic>) {
+        final width = result['width'] as double;
+        final height = result['height'] as double;
+
+        // Update the dimensions in the cart using index
+        cartProvider.updateDimensionsAtIndex(itemIndex, width, height);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${cartItem.product.name} boyutları güncellendi (${width.toStringAsFixed(0)}x${height.toStringAsFixed(0)} cm)'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    });
   }
 } 

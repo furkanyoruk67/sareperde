@@ -1,28 +1,33 @@
 import 'package:flutter/material.dart';
 
-// Modern color palette
+// Modern color palette with specified colors
 class AppColors {
-  static const primary = Color(0xFF2563EB);
-  static const primaryLight = Color(0xFF3B82F6);
-  static const primaryDark = Color(0xFF1D4ED8);
-  static const secondary = Color(0xFF64748B);
-  static const accent = Color(0xFFF59E0B);
+  // Primary colors
+  static const primary = Color(0xFF800020); // Bordo - primary color
+  static const primaryLight = Color(0xFFA00030); // Lighter bordo
+  static const primaryDark = Color(0xFF600018); // Darker bordo
+  static const secondary = Color(0xFF333333); // Koyu Gri
+  static const accent = Color(0xFFFFD700); // Altın - accent color
   static const success = Color(0xFF10B981);
-  static const error = Color(0xFFEF4444);
-  static const warning = Color(0xFFF59E0B);
+  static const error = Color(0xFFA64273);
+  static const warning = Color(0xFFFFD700); // Altın for warnings
 
-  static const background = Color(0xFFF8FAFC);
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceVariant = Color(0xFFF1F5F9);
+  // Background colors
+  static const background = Color(0xFFF5F5F5); // Açık Gri
+  static const surface = Color(0xFFFFFFFF); // Beyaz
+  static const surfaceVariant = Color(0xFFF8F8F8); // Slightly lighter açık gri
 
-  static const textPrimary = Color(0xFF1E293B);
-  static const textSecondary = Color(0xFF64748B);
-  static const textTertiary = Color(0xFF94A3B8);
+  // Text colors
+  static const textPrimary = Color(0xFF000000); // Siyah
+  static const textSecondary = Color(0xFF333333); // Koyu Gri
+  static const textTertiary = Color(0xFF666666); // Medium gray
 
-  static const border = Color(0xFFE2E8F0);
-  static const borderLight = Color(0xFFF1F5F9);
+  // Border colors
+  static const border = Color(0xFFE0E0E0); // Light gray border
+  static const borderLight = Color(0xFFF0F0F0); // Very light gray border
 
-  static const shadow = Color(0x0A000000);
-  static const shadowMedium = Color(0x1A000000);
-  static const shadowStrong = Color(0x33000000);
+  // Shadow colors
+  static const shadow = Color(0x0A000000); // Black with low opacity
+  static const shadowMedium = Color(0x1A000000); // Black with medium opacity
+  static const shadowStrong = Color(0x33000000); // Black with high opacity
 }
