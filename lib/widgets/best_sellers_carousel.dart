@@ -368,23 +368,26 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                            children: [
                                              // Product Name
-                                             Text(
-                                               product.name,
-                                               style: TextStyle(
-                                                 fontSize: isMobile ? 14 : 11, // Mobil için yazı boyutunu optimize ettik
-                                                 fontWeight: FontWeight.w600,
-                                                 color: AppColors.textPrimary,
-                                                 height: 1.2,
-                                               ),
-                                               maxLines: 2,
-                                               overflow: TextOverflow.ellipsis,
-                                             ),
+                                              SizedBox(
+                                                height: isMobile ? 36 : 24,
+                                                child: Text(
+                                                  product.name,
+                                                  style: TextStyle(
+                                                    fontSize: isMobile ? 13 : 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.textPrimary,
+                                                    height: 1.2,
+                                                  ),
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
                                              
                                                                                            // Favorilere Ekle Button - At the bottom
-                                              SizedBox(
-                                                width: double.infinity,
-                                                height: isMobile ? 36 : 24, // Mobil için buton yüksekliğini optimize ettik
-                                                child: ElevatedButton.icon(
+                                               SizedBox(
+                                                 width: double.infinity,
+                                                 height: isMobile ? 34 : 24,
+                                                 child: ElevatedButton.icon(
                                                   onPressed: () {
                                                     favoritesProvider.toggleFavorite(product);
                                                     final isFavorite = favoritesProvider.isFavorite(product);

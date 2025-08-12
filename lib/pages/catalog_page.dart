@@ -1017,7 +1017,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                      SliverToBoxAdapter(
                        child: Container(
                          width: double.infinity,
-                         height: isMobile ? 450 : 300, // Mobilde daha iyi yükseklik
+                         height: isMobile ? 520 : 300, // Mobilde daha yüksek alan
                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                          child: LayoutBuilder(
                            builder: (context, constraints) {
@@ -1028,11 +1028,11 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                // Mobile layout: Stack vertically
                                return Column(
                                  children: [
-                                   // Video Section (Top)
-                                   Expanded(
-                                     flex: 4, // Video için daha fazla alan
-                                     child: Container(
-                                       margin: const EdgeInsets.only(bottom: 16), // Daha fazla boşluk
+                                  // Video Section (Top)
+                                  Expanded(
+                                    flex: 4, // Video için alan
+                                    child: Container(
+                                      margin: const EdgeInsets.only(bottom: 20), // Video ile carousel arası boşluk
                                        child: Stack(
                                          children: [
                                            // Video as background
@@ -1097,11 +1097,11 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                    
                                                                      // Best Sellers Section (Bottom)
                                   Expanded(
-                                    flex: 5, // ÇOK SATANLAR için yeterli alan
+                                    flex: 6, // Çok Satanlar için daha fazla alan
                                     child: Container(
-                                      margin: const EdgeInsets.only(top: 0), // Üst margin kaldırıldı, alt margin yeterli
-                                                                          child: BestSellersCarousel(
-                                     height: double.infinity, // Tüm alanı kullan
+                                      margin: const EdgeInsets.only(top: 0),
+                                      child: BestSellersCarousel(
+                                        height: double.infinity,
                                          width: double.infinity,
                                          onProductInspect: (Product product) {
                                            _openProductModal(product);
@@ -1762,6 +1762,8 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
             ),
             // Filter Panel
             Positioned(
+              // On mobile, anchor to both left and right to ensure full-width overlay
+              left: isMobile ? 0 : null,
               right: 0,
               top: 0,
               bottom: 0,
