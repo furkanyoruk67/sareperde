@@ -141,7 +141,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
   double _getItemWidth() {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
-    return isMobile ? 160.0 : 220.0; // Mobil için kart genişliğini daha da azalttık, daha uzun yapmak için
+    return isMobile ? 180.0 : 220.0; // Mobil için kart genişliğini optimize ettik
   }
 
   void _onHoverEnter() {
@@ -255,10 +255,10 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                         return Consumer<FavoritesProvider>(
                           builder: (context, favoritesProvider, child) {
                                                         return Container(
-                              width: isMobile ? 160 : 160, // Mobil için kart genişliğini daha da azalttık, daha uzun yapmak için
+                              width: isMobile ? 180 : 160, // Mobil için kart genişliğini optimize ettik
                               margin: EdgeInsets.only(right: isMobile ? 12 : 12),
                               child: AspectRatio(
-                                aspectRatio: isMobile ? 0.5 : 0.85, // Mobil için daha da uzun kartlar (daha düşük aspect ratio)
+                                aspectRatio: isMobile ? 0.7 : 0.85, // Mobil için daha iyi oran
                                 child: Card(
                                 elevation: 4,
                                 shape: RoundedRectangleBorder(
@@ -270,7 +270,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                   children: [
                                     // Product Image
                                     Expanded(
-                                      flex: isMobile ? 5 : 3, // Mobil için resim alanını daha da artırdık
+                                      flex: isMobile ? 4 : 3, // Mobil için resim alanını dengeledik
                                       child: ClipRRect(
                                         borderRadius: const BorderRadius.vertical(
                                           top: Radius.circular(12),
@@ -360,9 +360,9 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                     
                                                                          // Product Info
                                      Expanded(
-                                       flex: isMobile ? 3 : 1, // Mobil için bilgi alanını daha da artırdık
+                                       flex: isMobile ? 3 : 1, // Mobil için bilgi alanını optimize ettik
                                        child: Container(
-                                         padding: EdgeInsets.all(isMobile ? 10 : 6), // Mobil için padding artırdık
+                                         padding: EdgeInsets.all(isMobile ? 8 : 6), // Mobil için padding optimize edildi
                                          child: Column(
                                            crossAxisAlignment: CrossAxisAlignment.start,
                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -371,7 +371,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                              Text(
                                                product.name,
                                                style: TextStyle(
-                                                 fontSize: isMobile ? 16 : 11, // Mobil için yazı boyutunu daha da artırdık
+                                                 fontSize: isMobile ? 14 : 11, // Mobil için yazı boyutunu optimize ettik
                                                  fontWeight: FontWeight.w600,
                                                  color: AppColors.textPrimary,
                                                  height: 1.2,
@@ -383,7 +383,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                                                                            // Favorilere Ekle Button - At the bottom
                                               SizedBox(
                                                 width: double.infinity,
-                                                height: isMobile ? 44 : 24, // Mobil için buton yüksekliğini daha da artırdık
+                                                height: isMobile ? 36 : 24, // Mobil için buton yüksekliğini optimize ettik
                                                 child: ElevatedButton.icon(
                                                   onPressed: () {
                                                     favoritesProvider.toggleFavorite(product);
@@ -405,7 +405,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                                       favoritesProvider.isFavorite(product)
                                                           ? Icons.favorite
                                                           : Icons.favorite_border,
-                                                      size: isMobile ? 18 : 10, // Mobil için ikon boyutunu daha da artırdık
+                                                      size: isMobile ? 16 : 10, // Mobil için ikon boyutunu optimize ettik
                                                     ),
                                                   label: Text(
                                                     favoritesProvider.isFavorite(product)
@@ -425,7 +425,7 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                                       vertical: isMobile ? 0 : 1,
                                                     ),
                                                     textStyle: TextStyle(
-                                                      fontSize: isMobile ? 12 : 7, // Mobil için yazı boyutunu daha da artırdık
+                                                      fontSize: isMobile ? 11 : 7, // Mobil için yazı boyutunu optimize ettik
                                                       fontWeight: FontWeight.w600,
                                                     ),
                                                     shape: RoundedRectangleBorder(

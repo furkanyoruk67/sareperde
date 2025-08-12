@@ -44,7 +44,7 @@ class FilterPanel extends StatelessWidget {
     final isMobile = screenWidth < 768;
     
     return Material(
-      elevation: 99999,
+      elevation: isMobile ? 0 : 8,
       color: Colors.transparent,
       child: Container(
         width: isMobile ? double.infinity : 280,
@@ -54,7 +54,7 @@ class FilterPanel extends StatelessWidget {
           border: Border(
             left: BorderSide(color: AppColors.border, width: 1),
           ),
-          boxShadow: [
+          boxShadow: isMobile ? [] : [
             BoxShadow(
               color: AppColors.shadow,
               blurRadius: 16,
@@ -69,155 +69,157 @@ class FilterPanel extends StatelessWidget {
             ),
           ],
         ),
-        child: Padding(
-          padding: EdgeInsets.all(isMobile ? 4 : 8),
-          child: Column(
-            children: [
-              // Panel başlığı
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 12 : 16, 
-                  vertical: isMobile ? 8 : 12
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.filter_alt,
-                      color: AppColors.surface,
-                      size: isMobile ? 16 : 18,
-                    ),
-                    SizedBox(width: isMobile ? 6 : 8),
-                    Expanded(
-                      child: Text(
-                        'FİLTRELER',
-                        style: TextStyle(
-                          fontSize: isMobile ? 12 : 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.surface,
-                          letterSpacing: 0.5,
-                        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(isMobile ? 8 : 8),
+            child: Column(
+              children: [
+                // Panel başlığı
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 12 : 16, 
+                    vertical: isMobile ? 8 : 12
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    if (onClose != null)
-                      IconButton(
-                        onPressed: onClose,
-                        icon: const Icon(
-                          Icons.close,
-                          color: AppColors.surface,
-                          size: 20,
-                        ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 32,
-                          minHeight: 32,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.surface.withOpacity(0.2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.filter_alt,
+                        color: AppColors.surface,
+                        size: isMobile ? 16 : 18,
+                      ),
+                      SizedBox(width: isMobile ? 6 : 8),
+                      Expanded(
+                        child: Text(
+                          'FİLTRELER',
+                          style: TextStyle(
+                            fontSize: isMobile ? 12 : 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.surface,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Kaydırılabilir filtre alanı
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    children: [
-                      _buildFilterCard('Ürün Tipi', ProductData.productTypes, selectedProductTypes, onProductTypeChanged),
-                      _buildFilterCard('Ebat', ProductData.sizes, selectedSizes, onSizeChanged),
-                      _buildFilterCard('Kalite', ProductData.qualities, selectedQualities, onQualityChanged),
-                      _buildFilterCard('Renk', ProductData.colors, selectedColors, onColorChanged),
-                      _buildFilterCard('Marka', ProductData.brands, selectedBrands, onBrandChanged),
-                      _buildPriceCard(),
-                      const SizedBox(height: 60), // butondan ayrışsın
+                      if (onClose != null)
+                        IconButton(
+                          onPressed: onClose,
+                          icon: const Icon(
+                            Icons.close,
+                            color: AppColors.surface,
+                            size: 20,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppColors.surface.withOpacity(0.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
-              ),
+                const SizedBox(height: 8),
 
-              // Kaydırılamayan sabit butonlar
-              SafeArea(
-                top: false,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      // Filtrele butonu
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: onApplyFilters,
-                          icon: const Icon(Icons.filter_alt, size: 18),
-                          label: const Text(
-                            'Filtrele',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.surface,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 0,
-                            shadowColor: AppColors.primary.withOpacity(0.3),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Filtreyi Sıfırla butonu
-                      if (onResetFilters != null)
+                // Kaydırılabilir filtre alanı
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Column(
+                      children: [
+                        _buildFilterCard('Ürün Tipi', ProductData.productTypes, selectedProductTypes, onProductTypeChanged),
+                        _buildFilterCard('Ebat', ProductData.sizes, selectedSizes, onSizeChanged),
+                        _buildFilterCard('Kalite', ProductData.qualities, selectedQualities, onQualityChanged),
+                        _buildFilterCard('Renk', ProductData.colors, selectedColors, onColorChanged),
+                        _buildFilterCard('Marka', ProductData.brands, selectedBrands, onBrandChanged),
+                        _buildPriceCard(),
+                        const SizedBox(height: 60), // butondan ayrışsın
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Kaydırılamayan sabit butonlar
+                SafeArea(
+                  top: false,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        // Filtrele butonu
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            onPressed: onResetFilters,
-                            icon: const Icon(Icons.refresh, size: 18),
+                            onPressed: onApplyFilters,
+                            icon: const Icon(Icons.filter_alt, size: 18),
                             label: const Text(
-                              'Filtreyi Sıfırla',
+                              'Filtrele',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.surface,
-                              foregroundColor: AppColors.textSecondary,
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.surface,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                side: BorderSide(color: AppColors.border),
                               ),
                               elevation: 0,
+                              shadowColor: AppColors.primary.withOpacity(0.3),
                             ),
                           ),
                         ),
-                    ],
+                        const SizedBox(height: 8),
+                        // Filtreyi Sıfırla butonu
+                        if (onResetFilters != null)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: onResetFilters,
+                              icon: const Icon(Icons.refresh, size: 18),
+                              label: const Text(
+                                'Filtreyi Sıfırla',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.surface,
+                                foregroundColor: AppColors.textSecondary,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: AppColors.border),
+                                ),
+                                elevation: 0,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
