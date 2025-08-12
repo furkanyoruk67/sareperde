@@ -358,89 +358,68 @@ class _BestSellersCarouselState extends State<BestSellersCarousel> {
                                       ),
                                     ),
                                     
-                                                                         // Product Info
+                                                                         // Product Info - Sadece Favorilere Ekle Butonu
                                      Expanded(
-                                       flex: isMobile ? 3 : 1, // Mobil için bilgi alanını optimize ettik
+                                       flex: isMobile ? 2 : 1, // Mobil için bilgi alanını optimize ettik
                                        child: Container(
                                          padding: EdgeInsets.all(isMobile ? 8 : 6), // Mobil için padding optimize edildi
-                                         child: Column(
-                                           crossAxisAlignment: CrossAxisAlignment.start,
-                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                           children: [
-                                             // Product Name
-                                              SizedBox(
-                                                height: isMobile ? 36 : 24,
-                                                child: Text(
-                                                  product.name,
-                                                  style: TextStyle(
-                                                    fontSize: isMobile ? 13 : 11,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: AppColors.textPrimary,
-                                                    height: 1.2,
+                                         child: Center(
+                                           child: SizedBox(
+                                             width: double.infinity,
+                                             height: isMobile ? 34 : 28,
+                                             child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                favoritesProvider.toggleFavorite(product);
+                                                final isFavorite = favoritesProvider.isFavorite(product);
+                                                
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      isFavorite 
+                                                        ? 'Ürün favorilere eklendi' 
+                                                        : 'Ürün favorilerden çıkarıldı',
+                                                    ),
+                                                    duration: const Duration(seconds: 2),
+                                                    backgroundColor: isFavorite ? AppColors.primary : AppColors.textSecondary,
                                                   ),
-                                                  maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
+                                                );
+                                              },
+                                              icon: Icon(
+                                                favoritesProvider.isFavorite(product)
+                                                    ? Icons.favorite
+                                                    : Icons.favorite_border,
+                                                size: isMobile ? 16 : 14,
+                                              ),
+                                              label: Text(
+                                                favoritesProvider.isFavorite(product)
+                                                    ? 'Favorilerden Çıkar'
+                                                    : 'Favorilere Ekle',
+                                                style: TextStyle(
+                                                  fontSize: isMobile ? 11 : 10,
+                                                  fontWeight: FontWeight.w600,
                                                 ),
                                               ),
-                                             
-                                                                                           // Favorilere Ekle Button - At the bottom
-                                               SizedBox(
-                                                 width: double.infinity,
-                                                 height: isMobile ? 34 : 24,
-                                                 child: ElevatedButton.icon(
-                                                  onPressed: () {
-                                                    favoritesProvider.toggleFavorite(product);
-                                                    final isFavorite = favoritesProvider.isFavorite(product);
-                                                    
-                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          isFavorite 
-                                                            ? '${product.name} favorilere eklendi' 
-                                                            : '${product.name} favorilerden çıkarıldı',
-                                                        ),
-                                                        duration: const Duration(seconds: 2),
-                                                        backgroundColor: isFavorite ? AppColors.primary : AppColors.textSecondary,
-                                                      ),
-                                                    );
-                                                  },
-                                                                                                      icon: Icon(
-                                                      favoritesProvider.isFavorite(product)
-                                                          ? Icons.favorite
-                                                          : Icons.favorite_border,
-                                                      size: isMobile ? 16 : 10, // Mobil için ikon boyutunu optimize ettik
-                                                    ),
-                                                  label: Text(
-                                                    favoritesProvider.isFavorite(product)
-                                                        ? 'Favorilerden Çıkar'
-                                                        : 'Favorilere Ekle',
-                                                  ),
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: favoritesProvider.isFavorite(product)
-                                                        ? AppColors.error.withValues(alpha: 0.1)
-                                                        : AppColors.primary.withValues(alpha: 0.1),
-                                                    foregroundColor: favoritesProvider.isFavorite(product)
-                                                        ? AppColors.error
-                                                        : AppColors.primary,
-                                                    elevation: 0,
-                                                    padding: EdgeInsets.symmetric(
-                                                      horizontal: isMobile ? 1 : 2,
-                                                      vertical: isMobile ? 0 : 1,
-                                                    ),
-                                                    textStyle: TextStyle(
-                                                      fontSize: isMobile ? 11 : 7, // Mobil için yazı boyutunu optimize ettik
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(3),
-                                                    ),
-                                                  ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: favoritesProvider.isFavorite(product)
+                                                    ? AppColors.error.withValues(alpha: 0.1)
+                                                    : AppColors.primary.withValues(alpha: 0.1),
+                                                foregroundColor: favoritesProvider.isFavorite(product)
+                                                    ? AppColors.error
+                                                    : AppColors.primary,
+                                                elevation: 0,
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: isMobile ? 8 : 12,
+                                                  vertical: isMobile ? 6 : 8,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(6),
                                                 ),
                                               ),
-                                           ],
-                                         ),
+                                            ),
+                                          ),
+                                        ),
                                        ),
-                                                                           ),
+                                     ),
                                   ],
                                 ),
                               ),
