@@ -233,8 +233,8 @@ class _AnimatedDropdownMenuState extends State<AnimatedDropdownMenu>
 enum SortOption {
   nameAZ,
   nameZA,
-  priceLowHigh,
-  priceHighLow,
+  // priceLowHigh, // Fiyat sıralaması kapatıldı
+  // priceHighLow, // Fiyat sıralaması kapatıldı
 }
 
 class CatalogPage extends StatefulWidget {
@@ -360,10 +360,10 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
         }
       }
       
-      // Fiyat filtresi
-      if (product.price < _priceRange.start || product.price > _priceRange.end) {
-        return false;
-      }
+      // Fiyat filtresi - Kapatıldı
+      // if (product.price < _priceRange.start || product.price > _priceRange.end) {
+      //   return false;
+      // }
       
       // Ürün tipi filtresi
       if (_selectedProductTypes.isNotEmpty && !_selectedProductTypes.contains(product.productType)) {
@@ -404,12 +404,12 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
       case SortOption.nameZA:
         _visibleProducts.sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
         break;
-      case SortOption.priceLowHigh:
-        _visibleProducts.sort((a, b) => a.price.compareTo(b.price));
-        break;
-      case SortOption.priceHighLow:
-        _visibleProducts.sort((a, b) => b.price.compareTo(a.price));
-        break;
+      // case SortOption.priceLowHigh: // Fiyat sıralaması kapatıldı
+      //   _visibleProducts.sort((a, b) => a.price.compareTo(b.price));
+      //   break;
+      // case SortOption.priceHighLow: // Fiyat sıralaması kapatıldı
+      //   _visibleProducts.sort((a, b) => b.price.compareTo(a.price));
+      //   break;
     }
   }
 
@@ -1325,58 +1325,59 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                                 ],
                                               ),
                                             ),
-                                            PopupMenuItem(
-                                              value: SortOption.priceLowHigh,
-                                              child: Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.attach_money,
-                                                    size: 16,
-                                                    color: _currentSortOption == SortOption.priceLowHigh
-                                                        ? AppColors.primary
-                                                        : AppColors.textSecondary,
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Text(
-                                                    'Fiyat (Düşük-Yüksek)',
-                                                    style: TextStyle(
-                                                      color: _currentSortOption == SortOption.priceLowHigh
-                                                          ? AppColors.primary
-                                                          : AppColors.textSecondary,
-                                                      fontWeight: _currentSortOption == SortOption.priceLowHigh
-                                                          ? FontWeight.w600
-                                                          : FontWeight.normal,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            PopupMenuItem(
-                                              value: SortOption.priceHighLow,
-                                              child: Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.attach_money,
-                                                    size: 16,
-                                                    color: _currentSortOption == SortOption.priceHighLow
-                                                        ? AppColors.primary
-                                                        : AppColors.textSecondary,
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Text(
-                                                    'Fiyat (Yüksek-Düşük)',
-                                                    style: TextStyle(
-                                                      color: _currentSortOption == SortOption.priceHighLow
-                                                          ? AppColors.primary
-                                                          : AppColors.textSecondary,
-                                                      fontWeight: _currentSortOption == SortOption.priceHighLow
-                                                          ? FontWeight.w600
-                                                          : FontWeight.normal,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                            // Fiyat sıralama seçenekleri kapatıldı
+                                            // PopupMenuItem(
+                                            //   value: SortOption.priceLowHigh,
+                                            //   child: Row(
+                                            //     children: [
+                                            //       Icon(
+                                            //         Icons.attach_money,
+                                            //         size: 16,
+                                            //         color: _currentSortOption == SortOption.priceLowHigh
+                                            //             ? AppColors.primary
+                                            //             : AppColors.textSecondary,
+                                            //       ),
+                                            //       const SizedBox(width: 8),
+                                            //       Text(
+                                            //         'Fiyat (Düşük-Yüksek)',
+                                            //         style: TextStyle(
+                                            //           color: _currentSortOption == SortOption.priceLowHigh
+                                            //               ? AppColors.primary
+                                            //               : AppColors.textSecondary,
+                                            //           fontWeight: _currentSortOption == SortOption.priceLowHigh
+                                            //               ? FontWeight.w600
+                                            //               : FontWeight.normal,
+                                            //         ),
+                                            //       ),
+                                            //     ],
+                                            //   ),
+                                            // ),
+                                            // PopupMenuItem(
+                                            //   value: SortOption.priceHighLow,
+                                            //   child: Row(
+                                            //     children: [
+                                            //       Icon(
+                                            //         Icons.attach_money,
+                                            //         size: 16,
+                                            //         color: _currentSortOption == SortOption.priceHighLow
+                                            //             ? AppColors.primary
+                                            //             : AppColors.textSecondary,
+                                            //       ),
+                                            //       const SizedBox(width: 8),
+                                            //       Text(
+                                            //         'Fiyat (Yüksek-Düşük)',
+                                            //         style: TextStyle(
+                                            //           color: _currentSortOption == SortOption.priceHighLow
+                                            //               ? AppColors.primary
+                                            //               : AppColors.textSecondary,
+                                            //           fontWeight: _currentSortOption == SortOption.priceHighLow
+                                            //               ? FontWeight.w600
+                                            //               : FontWeight.normal,
+                                            //         ),
+                                            //       ),
+                                            //     ],
+                                            //   ),
+                                            // ),
                                           ],
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1561,58 +1562,59 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                               ],
                                             ),
                                           ),
-                                          PopupMenuItem(
-                                            value: SortOption.priceLowHigh,
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.attach_money,
-                                                  size: 16,
-                                                  color: _currentSortOption == SortOption.priceLowHigh
-                                                      ? AppColors.primary
-                                                      : AppColors.textSecondary,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  'Fiyat (Düşük-Yüksek)',
-                                                  style: TextStyle(
-                                                    color: _currentSortOption == SortOption.priceLowHigh
-                                                        ? AppColors.primary
-                                                        : AppColors.textSecondary,
-                                                    fontWeight: _currentSortOption == SortOption.priceLowHigh
-                                                        ? FontWeight.w600
-                                                        : FontWeight.normal,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          PopupMenuItem(
-                                            value: SortOption.priceHighLow,
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.attach_money,
-                                                  size: 16,
-                                                  color: _currentSortOption == SortOption.priceHighLow
-                                                      ? AppColors.primary
-                                                      : AppColors.textSecondary,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  'Fiyat (Yüksek-Düşük)',
-                                                  style: TextStyle(
-                                                    color: _currentSortOption == SortOption.priceHighLow
-                                                        ? AppColors.primary
-                                                        : AppColors.textSecondary,
-                                                    fontWeight: _currentSortOption == SortOption.priceHighLow
-                                                        ? FontWeight.w600
-                                                        : FontWeight.normal,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                          // Fiyat sıralama seçenekleri kapatıldı
+                                          // PopupMenuItem(
+                                          //   value: SortOption.priceLowHigh,
+                                          //   child: Row(
+                                          //     children: [
+                                          //       Icon(
+                                          //         Icons.attach_money,
+                                          //         size: 16,
+                                          //         color: _currentSortOption == SortOption.priceLowHigh
+                                          //             ? AppColors.primary
+                                          //             : AppColors.textSecondary,
+                                          //       ),
+                                          //       const SizedBox(width: 8),
+                                          //       Text(
+                                          //         'Fiyat (Düşük-Yüksek)',
+                                          //         style: TextStyle(
+                                          //           color: _currentSortOption == SortOption.priceLowHigh
+                                          //               ? AppColors.primary
+                                          //               : AppColors.textSecondary,
+                                          //           fontWeight: _currentSortOption == SortOption.priceLowHigh
+                                          //               ? FontWeight.w600
+                                          //               : FontWeight.normal,
+                                          //         ),
+                                          //       ),
+                                          //     ],
+                                          //   ),
+                                          // ),
+                                          // PopupMenuItem(
+                                          //   value: SortOption.priceHighLow,
+                                          //   child: Row(
+                                          //     children: [
+                                          //       Icon(
+                                          //         Icons.attach_money,
+                                          //         size: 16,
+                                          //         color: _currentSortOption == SortOption.priceHighLow
+                                          //             ? AppColors.primary
+                                          //             : AppColors.textSecondary,
+                                          //       ),
+                                          //       const SizedBox(width: 8),
+                                          //       Text(
+                                          //         'Fiyat (Yüksek-Düşük)',
+                                          //         style: TextStyle(
+                                          //           color: _currentSortOption == SortOption.priceHighLow
+                                          //               ? AppColors.primary
+                                          //               : AppColors.textSecondary,
+                                          //           fontWeight: _currentSortOption == SortOption.priceHighLow
+                                          //               ? FontWeight.w600
+                                          //               : FontWeight.normal,
+                                          //         ),
+                                          //       ),
+                                          //     ],
+                                          //   ),
+                                          // ),
                                         ],
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1774,10 +1776,11 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                   selectedBrands: _selectedBrands,
                   priceRange: _priceRange,
                   onPriceRangeChanged: (range) {
-                    setState(() {
-                      _priceRange = range;
-                      _applyFilters();
-                    });
+                    // Fiyat filtresi kapatıldı
+                    // setState(() {
+                    //   _priceRange = range;
+                    //   _applyFilters();
+                    // });
                   },
                   onProductTypeChanged: (type, isSelected) {
                     setState(() {

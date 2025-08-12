@@ -142,12 +142,12 @@ class FilterPanel extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Column(
                       children: [
-                        _buildFilterCard('Ürün Tipi', ProductData.productTypes, selectedProductTypes, onProductTypeChanged),
-                        _buildFilterCard('Ebat', ProductData.sizes, selectedSizes, onSizeChanged),
-                        _buildFilterCard('Kalite', ProductData.qualities, selectedQualities, onQualityChanged),
-                        _buildFilterCard('Renk', ProductData.colors, selectedColors, onColorChanged),
-                        _buildFilterCard('Marka', ProductData.brands, selectedBrands, onBrandChanged),
-                        _buildPriceCard(),
+                                              _buildFilterCard('Ürün Tipi', ProductData.productTypes, selectedProductTypes, onProductTypeChanged),
+                      _buildFilterCard('Ebat', ProductData.sizes, selectedSizes, onSizeChanged),
+                      _buildFilterCard('Kalite', ProductData.qualities, selectedQualities, onQualityChanged),
+                      _buildFilterCard('Renk', ProductData.colors, selectedColors, onColorChanged),
+                      _buildFilterCard('Marka', ProductData.brands, selectedBrands, onBrandChanged),
+                      // _buildPriceCard(), // Fiyat filtresi kapatıldı
                         const SizedBox(height: 60), // butondan ayrışsın
                       ],
                     ),
