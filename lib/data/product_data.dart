@@ -53,24 +53,24 @@ class ProductData {
   // ===========================================
   // Bu ürünler otomatik olarak assets/extracted_pages klasöründen oluşturulur
   // SADECE anasayfada görünür, çok satanlarda GÖZÜKMEZLİR
-  static List<Product> get extractedPagesProducts {
-    List<Product> products = [];
-    
+  static final List<Product> extractedPagesProducts = (() {
+    final List<Product> products = [];
+
     // ByHalitCollection2022sweb klasörü (70 ürün)
     for (int i = 1; i <= 70; i++) {
       products.add(Product(
         name: 'By Halit Collection 2022 - Sayfa ${i.toString().padLeft(3, '0')}',
         image: 'assets/extracted_pages/ByHalitCollection2022sweb/sayfa_${i.toString().padLeft(3, '0')}.png',
         category: 'By Halit Collection',
-      productType: 'Fon Perdeler',
+        productType: 'Fon Perdeler',
         size: 'Çoklu Ebat',
         quality: 'Premium Polyester',
-      color: 'Çok Renkli',
+        color: 'Çok Renkli',
         brand: 'By Halit',
         price: 1200 + (i * 50), // 1250-4700 arası fiyat aralığı
       ));
     }
-    
+
     // ByHalitCollectionAksesuarKatalog klasörü (78 ürün)
     for (int i = 1; i <= 78; i++) {
       products.add(Product(
@@ -81,11 +81,11 @@ class ProductData {
         size: 'Standart',
         quality: 'Premium',
         color: 'Çeşitli',
-      brand: 'By Halit',
+        brand: 'By Halit',
         price: 299 + (i * 25), // 324-2249 arası fiyat aralığı
       ));
     }
-    
+
     // Stor_Katalogu klasörü (31 ürün)
     for (int i = 1; i <= 31; i++) {
       products.add(Product(
@@ -100,7 +100,7 @@ class ProductData {
         price: 800 + (i * 30), // 830-1730 arası fiyat aralığı
       ));
     }
-    
+
     // Guzzi_Brosur klasörü (23 ürün)
     for (int i = 1; i <= 23; i++) {
       products.add(Product(
@@ -115,7 +115,7 @@ class ProductData {
         price: 950 + (i * 40), // 990-1870 arası fiyat aralığı
       ));
     }
-    
+
     // Basic_Collection klasörü (52 ürün)
     for (int i = 1; i <= 52; i++) {
       products.add(Product(
@@ -130,9 +130,9 @@ class ProductData {
         price: 600 + (i * 20), // 620-1640 arası fiyat aralığı
       ));
     }
-    
+
     return products;
-  }
+  })();
 
   // ===========================================
   // ÇOK SATANLAR LİSTESİ

@@ -78,35 +78,43 @@ class ProductModal extends StatelessWidget {
                                 maxWidth: MediaQuery.of(context).size.width * 0.9,
                                 maxHeight: MediaQuery.of(context).size.height * 0.8,
                               ),
-                              child: Image.asset(
-                                selectedProduct!.image,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    width: 300,
-                                    height: 300,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.broken_image,
-                                          size: 64,
-                                          color: Colors.grey[400],
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final double maxW = constraints.maxWidth.isFinite ? constraints.maxWidth : 800;
+                                  final int cacheWidth = maxW.clamp(400.0, 1400.0).toInt();
+                                  return Image.asset(
+                                    selectedProduct!.image,
+                                    fit: BoxFit.contain,
+                                    cacheWidth: cacheWidth,
+                                    filterQuality: FilterQuality.low,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 300,
+                                        height: 300,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
-                                        SizedBox(height: 16),
-                                        Text(
-                                          'Görsel yüklenemedi',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 16,
-                                          ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.broken_image,
+                                              size: 64,
+                                              color: Colors.grey[400],
+                                            ),
+                                            SizedBox(height: 16),
+                                            Text(
+                                              'Görsel yüklenemedi',
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
+                                      );
+                                    },
                                   );
                                 },
                               ),

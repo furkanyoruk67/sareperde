@@ -59,35 +59,47 @@ class ProductCard extends StatelessWidget {
                             topLeft: Radius.circular(16),
                             topRight: Radius.circular(16),
                           ),
-                          child: Image.asset(
-                            product.image,
-                            fit: BoxFit.contain,
-                            alignment: Alignment.center,
-                            errorBuilder: (context, error, stackTrace) {
-                              print('Asset yükleme hatası: ${product.image}');
-                              return Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                color: AppColors.surfaceVariant,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.image_not_supported,
-                                      color: AppColors.textSecondary,
-                                      size: 40,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final targetWidth = constraints.maxWidth.isFinite
+                                  ? constraints.maxWidth
+                                  : (MediaQuery.of(context).size.width / (isMobile ? 2 : 5));
+                              final int cacheWidth = targetWidth.isFinite
+                                  ? targetWidth.clamp(200.0, 800.0).toInt()
+                                  : 600;
+                              return Image.asset(
+                                product.image,
+                                fit: BoxFit.contain,
+                                alignment: Alignment.center,
+                                cacheWidth: cacheWidth,
+                                filterQuality: FilterQuality.low,
+                                errorBuilder: (context, error, stackTrace) {
+                                  print('Asset yükleme hatası: ${product.image}');
+                                  return Container(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    color: AppColors.surfaceVariant,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.image_not_supported,
+                                          color: AppColors.textSecondary,
+                                          size: 40,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Görsel yüklenemedi',
+                                          style: TextStyle(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 12,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Görsel yüklenemedi',
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 12,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                },
                               );
                             },
                           ),
