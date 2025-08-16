@@ -304,13 +304,13 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
   final int _pageIncrement = 20;
   bool _isLoadingMore = false;
 
-  // List of slider images from the Slider folder
+  // List of slider images from the Slider folder (WebP format for better performance)
   final List<String> sliderImages = [
-    'assets/Slider/Ekran görüntüsü 2025-08-11 233136.png',
-    'assets/Slider/Ekran görüntüsü 2025-08-11 233113.png',
-    'assets/Slider/Ekran görüntüsü 2025-08-11 232840.png',
-    'assets/Slider/Ekran görüntüsü 2025-08-11 232819.png',
-    'assets/Slider/Ekran görüntüsü 2025-08-11 232717.png',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 233136.webp',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 233113.webp',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 232840.webp',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 232819.webp',
+    'assets/Slider/Ekran görüntüsü 2025-08-11 232717.webp',
   ];
 
   bool _hasActiveFilters = false;
@@ -962,7 +962,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Image.asset('assets/logo1.jpg', height: 32),
+              child: Image.asset('assets/logo1.webp', height: 32),
             ),
             const SizedBox(width: 8),
             Flexible(
@@ -1085,7 +1085,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
                                 ),
                               ],
                             ),
-                            child: Image.asset('assets/logo1.jpg', height: 50),
+                            child: Image.asset('assets/logo1.webp', height: 50),
                           ),
                           const SizedBox(width: 16),
                           Flexible(
